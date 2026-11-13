@@ -1,6 +1,6 @@
 # Retrieval
 
-Canonical copy: [README §7](../README.md#7-retrieval).
+Canonical copy: [README §8](../README.md#8-retrieval).
 
 ## Hybrid GraphRAG
 

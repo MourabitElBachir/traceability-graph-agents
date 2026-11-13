@@ -3,7 +3,6 @@
 Le flux réel du dépôt : ERP SQLite → contrôles qualité → ingestion → graphe (mémoire en CI, Neo4j en Compose) et chunks → GraphRAG → superviseur LangGraph → API, MCP, carte A2A. Le rappel s’arrête pour une personne.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart LR
   erp["ERP SQL"] --> ingest["Ingestion"] --> graphe["Graphe"]
   graphe --> agents["LangGraph"] --> api["API"]

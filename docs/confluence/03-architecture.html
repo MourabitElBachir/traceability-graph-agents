@@ -18,7 +18,7 @@
 <body>
 <p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
 <h1>Architecture</h1>
-<p>Canonical copy: <a href="../README.md#4-architecture">README §4</a>.</p>
+<p>Canonical copy: <a href="../README.md#5-architecture">README §5</a>.</p>
 <h2>Context</h2>
 <p>A quality lead or an auditor asks AgriTrace where a lot went and whether <code>CERT-77</code> still covers it. The language model is optional. Mock mode is the default.</p>
 <h2>Containers in this repository</h2>
@@ -60,6 +60,6 @@ sequenceDiagram
 <h2>Deployment</h2>
 <p><code>compose.yaml</code> starts Neo4j and the API. Ports publish on <code>127.0.0.1</code>. The container listens on <code>0.0.0.0:$PORT</code>. CI does not use Compose.</p>
 <h2>Cross-cutting</h2>
-<p>Observability, the eval set, the LLM gateway, and security controls are sections 9–13 of the README. The richer company platform is <a href="target-architecture.md">target-architecture.md</a>.</p>
+<p>Observability, the eval set, the LLM gateway, and security controls are sections 10–14 of the README. The richer company platform is <a href="target-architecture.md">target-architecture.md</a>.</p>
 </body>
 </html>

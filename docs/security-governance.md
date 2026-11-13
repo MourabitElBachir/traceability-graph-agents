@@ -1,6 +1,6 @@
 # Security and governance
 
-Canonical copy: [README §9](../README.md#9-security-and-governance).
+Canonical copy: [README §10](../README.md#10-security-and-governance).
 
 ## Data governance
 

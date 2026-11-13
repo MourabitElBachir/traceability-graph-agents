@@ -1,6 +1,6 @@
 # Evaluation
 
-Canonical copy: [README §11](../README.md#11-evaluation).
+Canonical copy: [README §12](../README.md#12-evaluation).
 
 `python -m agritrace.eval.runner` loads `src/agritrace/eval/dataset.json` and scores seven questions against the mock service. A case fails when a status, expected id, expected phrase, forbidden id, or forbidden phrase does not match. Pytest runs the same function.
 
