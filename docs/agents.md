@@ -1,6 +1,6 @@
 # Agents
 
-Canonical copy: [README §6](../README.md#6-agents).
+Canonical copy: [README §7](../README.md#7-agents).
 
 ## State
 
@@ -18,7 +18,6 @@ The supervisor routes with keywords (English and a few French words), not with a
 - `compose` renders text from the payloads.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart TD
   route --> trace --> compose
   route --> compliance --> compose

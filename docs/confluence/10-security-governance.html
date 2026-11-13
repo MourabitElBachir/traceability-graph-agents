@@ -18,7 +18,7 @@
 <body>
 <p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
 <h1>Security and governance</h1>
-<p>Canonical copy: <a href="../README.md#9-security-and-governance">README §9</a>.</p>
+<p>Canonical copy: <a href="../README.md#10-security-and-governance">README §10</a>.</p>
 <h2>Data governance</h2>
 <ul><li><strong>Lineage.</strong> Nodes are loaded from the SQLite extract and tagged <code>source_system=erp-sqlite</code>.</li><li><strong>Catalog.</strong> The ontology file is the catalog. <code>GET /ontology</code> returns classes and version.</li><li><strong>Versioning.</strong> <code>owl:versionInfo &quot;0.1.0&quot;</code> is copied to <code>ontology_version</code> on ingest.</li><li><strong>Quality.</strong> <code>check_quality</code> fails the load on dangling ids, inverted certificate dates, and empty documents. Expired <code>CERT-78</code> and the empty-input press step are findings, not load errors: they are the scenario.</li></ul>
 <h2>Access</h2>

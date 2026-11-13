@@ -1,6 +1,6 @@
 # AgriTrace — résumé
 
-[Texte canonique en anglais](../../README.md). Données **fictives**. Aucune entreprise cliente.
+[README complet en français](../../README.fr.md) · [texte canonique en anglais](../../README.md). Données **fictives**. Aucune entreprise cliente.
 
 ## Le problème
 

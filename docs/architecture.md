@@ -1,6 +1,6 @@
 # Architecture
 
-Canonical copy: [README §4](../README.md#4-architecture).
+Canonical copy: [README §5](../README.md#5-architecture).
 
 ## Context
 
@@ -9,18 +9,17 @@ A quality lead or an auditor asks AgriTrace where a lot went and whether `CERT-7
 ## Containers in this repository
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'secondaryColor': '#F4E8C1', 'tertiaryColor': '#E7F0EA', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart LR
-  erp["SQLite ERP"] --> ingest["Ingestion"] --> graph["Neo4j or memory graph"]
+  erp["SQLite ERP"] --> ingest["Ingestion"] --> neo4jGraph["Neo4j or memory graph"]
   ingest --> vec["Chunk vectors"]
-  graph --> rag["GraphRAG"]
+  neo4jGraph --> rag["GraphRAG"]
   vec --> rag --> agents["LangGraph"]
   agents --> api["FastAPI"]
   agents --> mcp["MCP"]
   agents --> a2a["A2A minimal"]
   agents --> human["Human approval"]
   classDef box fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
-  class erp,ingest,graph,vec,rag,agents,api,mcp,a2a,human box;
+  class erp,ingest,neo4jGraph,vec,rag,agents,api,mcp,a2a,human box;
 ```
 
 ![Repository containers](assets/architecture.svg)
@@ -42,7 +41,6 @@ SQL is the ledger. Ingestion checks referential integrity, writes SQLite, reads 
 ## Sequence for a recall of BLE-0457
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Georgia, serif'}}}%%
 sequenceDiagram
   actor User
   participant Supervisor
@@ -61,4 +59,4 @@ sequenceDiagram
 
 ## Cross-cutting
 
-Observability, the eval set, the LLM gateway, and security controls are sections 9–13 of the README. The richer company platform is [target-architecture.md](target-architecture.md).
+Observability, the eval set, the LLM gateway, and security controls are sections 10–14 of the README. The richer company platform is [target-architecture.md](target-architecture.md).

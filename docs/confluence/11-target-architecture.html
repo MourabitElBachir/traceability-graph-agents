@@ -18,7 +18,7 @@
 <body>
 <p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
 <h1>Target architecture</h1>
-<p>Canonical copy: <a href="../README.md#44-target-architecture-for-a-certification-company">README §4.4</a>.</p>
+<p>Canonical copy: <a href="../README.md#54-target-architecture-for-a-certification-company">README §5.4</a>.</p>
 <p>This page describes a platform for an agrifood certification organisation. <strong>It is not what <code>compose.yaml</code> deploys.</strong> The repository is the reference slice: one SQL extract, one graph, one API process, a mock model, and a human interrupt.</p>
 <p><img alt="Business view beside technical view" src="../assets/target-architecture.svg"/></p>
 <h2>Business view</h2>
@@ -44,7 +44,7 @@ flowchart LR
 <tr><td>Reasoning</td><td>LangChain prompts, LangGraph workflows</td><td>Implemented</td></tr>
 <tr><td>Edges</td><td>MCP tools, A2A tasks</td><td>MCP plus a minimal card</td></tr>
 <tr><td>Edge</td><td>API gateway, Kubernetes, CI/CD</td><td>FastAPI, Compose, GitHub Actions</td></tr>
-<tr><td>Cross-cutting</td><td>Identity, row security, audit vault, OTel, LLM policy</td><td>Sketched and partly implemented (section 9 of the README)</td></tr>
+<tr><td>Cross-cutting</td><td>Identity, row security, audit vault, OTel, LLM policy</td><td>Sketched and partly implemented (section 10 of the README)</td></tr>
 </tbody></table>
 <p>Identity, a durable audit log, and a full A2A lifecycle are on the roadmap, not done.</p>
 </body>

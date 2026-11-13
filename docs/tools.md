@@ -1,6 +1,6 @@
 # Tools
 
-Canonical copy: [README §8](../README.md#8-tools). Summary first, then one section per tool.
+Canonical copy: [README §9](../README.md#9-tools). Summary first, then one section per tool.
 
 | Tool | Role here |
 | --- | --- |

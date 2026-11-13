@@ -1,3 +1,5 @@
+**English** | [Français](README.fr.md)
+
 # AgriTrace
 
 [![CI](https://github.com/MourabitElBachir/traceability-graph-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/MourabitElBachir/traceability-graph-agents/actions/workflows/ci.yml)
@@ -19,20 +21,21 @@ The same material is split under [`docs/`](docs/), [`docs/fr/`](docs/fr/), and [
 1. [Business context](#1-business-context)
 2. [Concepts in plain language](#2-concepts-in-plain-language)
 3. [The running example](#3-the-running-example)
-4. [Architecture](#4-architecture)
-5. [Ontology and graph schema](#5-ontology-and-graph-schema)
-6. [Agents](#6-agents)
-7. [Retrieval](#7-retrieval)
-8. [Tools](#8-tools)
-9. [Security and governance](#9-security-and-governance)
-10. [Design choices and limits](#10-design-choices-and-limits)
-11. [Evaluation](#11-evaluation)
-12. [Observability](#12-observability)
-13. [Continuous integration](#13-continuous-integration)
-14. [Quickstart](#14-quickstart)
-15. [Example questions and answers](#15-example-questions-and-answers)
-16. [Roadmap](#16-roadmap)
-17. [Résumé en français](#17-résumé-en-français)
+4. [Data walkthrough](#4-data-walkthrough)
+5. [Architecture](#5-architecture)
+6. [Ontology and graph schema](#6-ontology-and-graph-schema)
+7. [Agents](#7-agents)
+8. [Retrieval](#8-retrieval)
+9. [Tools](#9-tools)
+10. [Security and governance](#10-security-and-governance)
+11. [Design choices and limits](#11-design-choices-and-limits)
+12. [Evaluation](#12-evaluation)
+13. [Observability](#13-observability)
+14. [Continuous integration](#14-continuous-integration)
+15. [Quickstart](#15-quickstart)
+16. [Example questions and answers](#16-example-questions-and-answers)
+17. [Roadmap](#17-roadmap)
+18. [Résumé en français](#18-résumé-en-français)
 
 ---
 
@@ -176,18 +179,392 @@ Same identifiers in the seed ([`src/agritrace/data/generator.py`](src/agritrace/
 
 ---
 
-## 4. Architecture
+## 4. Data walkthrough
 
-### 4.1 What this repository runs
+This section follows one thread, `BLE-0457 → FAR-118 → BIS-031` covered by `CERT-77`, through every format the data takes. Each excerpt is copied from the repository files or from the output of the code in mock mode (`LLM_MODE=mock`, `GRAPH_BACKEND=memory`, `AGRITRACE_AS_OF=2026-11-13`). Long lists are trimmed with `...`.
+
+```mermaid
+flowchart LR
+  s1["1. ERP SQL rows"] --> s2["2. Quality checks"] --> s3["3. Neo4j nodes and edges"]
+  s3 --> s4["4. Chunks and embeddings"] --> s5["5. GraphRAG query"]
+  s5 --> s6["6. LangGraph state"] --> s7["7. MCP and A2A"] --> s8["8. Grounded answer"] --> s9["9. Eval case"]
+  classDef box fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  class s1,s2,s3,s4,s5,s6,s7,s8,s9 box;
+```
+
+### 4.1 Source ERP rows (SQL)
+
+The ERP extract is the system of record. [`src/agritrace/data/schema.sql`](src/agritrace/data/schema.sql) defines plain tables. A transformation is one row in `process_steps` plus its input and output lots, so the chain is stored as facts, not as a path. Lists such as `claimed_schemes` and `covers_lot_ids` are JSON stored as `TEXT`, which Postgres also accepts.
+
+```sql
+CREATE TABLE lots (
+    id TEXT PRIMARY KEY,
+    lot_code TEXT NOT NULL,
+    product_id TEXT NOT NULL REFERENCES products(id),
+    quantity REAL NOT NULL,
+    unit TEXT NOT NULL,
+    produced_on TEXT NOT NULL,
+    site_id TEXT NOT NULL REFERENCES sites(id),
+    claimed_schemes TEXT NOT NULL
+);
+
+CREATE TABLE process_inputs (
+    step_id TEXT NOT NULL REFERENCES process_steps(id),
+    lot_id TEXT NOT NULL REFERENCES lots(id),
+    quantity REAL NOT NULL,
+    unit TEXT NOT NULL,
+    PRIMARY KEY (step_id, lot_id)
+);
+```
+
+Rows for the thread, read back from SQLite after [`write_dataset`](src/agritrace/data/erp.py):
+
+`lots`
+
+| id | product_id | quantity | unit | produced_on | site_id | claimed_schemes |
+| --- | --- | --- | --- | --- | --- | --- |
+| BLE-0457 | PRD-WHEAT | 12000.0 | kg | 2026-06-12 | SITE-COLLINES | `["Organic Horizon"]` |
+| FAR-118 | PRD-FLOUR | 9400.0 | kg | 2026-07-03 | SITE-VAL | `["Organic Horizon"]` |
+| BIS-031 | PRD-BISCUIT | 7100.0 | kg | 2026-07-22 | SITE-LUMIERE | `["Organic Horizon"]` |
+
+`process_steps`, `process_inputs`, `process_outputs`
+
+| step id | biz_step | event_time | site_id | input lot (kg) | output lot (kg) |
+| --- | --- | --- | --- | --- | --- |
+| P-MILL-118 | transformation | 2026-07-03T09:30:00+00:00 | SITE-VAL | BLE-0457 (12000.0) | FAR-118 (9400.0) |
+| P-BAKE-031 | transformation | 2026-07-22T06:15:00+00:00 | SITE-LUMIERE | FAR-118 (9400.0) | BIS-031 (7100.0) |
+
+`shipments` and `shipment_lines`
+
+| id | shipped_on | from_site_id | to_site_id | sscc | lot |
+| --- | --- | --- | --- | --- | --- |
+| SHIP-BIS-1 | 2026-07-23 | SITE-LUMIERE | SITE-DISTNORD | DEMO-SSCC-BIS-1 | BIS-031 |
+| SHIP-BIS-2 | 2026-07-24 | SITE-DISTNORD | SITE-RIVE | DEMO-SSCC-BIS-2 | BIS-031 |
+
+`certificates`
+
+```json
+{"id": "CERT-77", "scheme": "Organic Horizon", "status": "valid",
+ "valid_from": "2025-04-01", "valid_to": "2027-12-31",
+ "issuer_actor_id": "ACT-HORIZON", "holder_actor_id": "ACT-LUMIERE",
+ "covers_lot_ids": "[\"BLE-0457\", \"FAR-118\", \"BIS-031\"]",
+ "covers_site_ids": "[\"SITE-COLLINES\", \"SITE-VAL\", \"SITE-LUMIERE\"]",
+ "covers_actor_ids": "[\"ACT-COLLINES\", \"ACT-VAL\", \"ACT-LUMIERE\"]"}
+```
+
+### 4.2 Ingestion and quality checks
+
+Before anything reaches the graph, [`check_quality`](src/agritrace/data/quality.py) runs referential and structural checks: every site, product, lot, actor, and certificate id must exist, ids must be unique, quantities must be positive, validity dates must not be inverted, a commissioning step must not consume lots, and every step must produce something. A failure is an **error** and stops the load. Business anomalies are **findings**: they load, because the compliance agent needs them.
+
+On the seed data the report is:
+
+```text
+errors:   []
+findings: ['broken_chain:P-PRESS-009', 'expired_certificate:CERT-78']
+```
+
+A rejected example, as in `tests/test_hero_chain.py::test_quality_rejects_a_dangling_lot`, which points `BLE-0457` at a product that does not exist:
+
+```text
+errors: ['unknown product missing-product']
+```
+
+`build_service` raises `RuntimeError("data quality failed: ...")` in that case, so a broken extract never becomes a graph. A good extract is written to SQLite and read back (`roundtrip`) before the graph load, so the graph is always built from what SQL actually stored.
+
+### 4.3 Neo4j nodes and relationships
+
+[`Neo4jStore.sync`](src/agritrace/graph/neo4j_store.py) projects the rows into the graph with idempotent `MERGE`, so it is safe to run on every boot. Each node also gets `source_system = "erp-sqlite"` and `ontology_version = "0.1.0"` for lineage. The `INPUT_OF` edge is derived from each process step (every input lot points to every output lot), which turns the recall question into a short graph walk.
+
+```cypher
+MERGE (n:Lot {id: $id})
+SET n.lot_code = $lot_code, n.quantity = $quantity, n.unit = $unit,
+    n.produced_on = $produced_on, n.claimed_schemes = $schemes, n += $meta
+WITH n
+MATCH (p:Product {id: $product_id})
+MERGE (n)-[:OF_PRODUCT]->(p)
+WITH n
+MATCH (s:Site {id: $site_id})
+MERGE (n)-[:PRODUCED_AT]->(s)
+```
+
+```cypher
+MATCH (src:Lot {id: $src}), (dst:Lot {id: $dst})
+MERGE (src)-[r:INPUT_OF]->(dst)
+SET r.step_id = $step_id
+```
+
+Resulting nodes for the thread (properties as set by `sync`, `meta` omitted):
+
+| Label | id | Main properties |
+| --- | --- | --- |
+| Lot | BLE-0457 | quantity 12000.0 kg, produced_on 2026-06-12 |
+| Lot | FAR-118 | quantity 9400.0 kg, produced_on 2026-07-03 |
+| Lot | BIS-031 | quantity 7100.0 kg, produced_on 2026-07-22 |
+| ProcessStep | P-MILL-118 | biz_step transformation, event_time 2026-07-03T09:30:00+00:00 |
+| ProcessStep | P-BAKE-031 | biz_step transformation, event_time 2026-07-22T06:15:00+00:00 |
+| Site | SITE-VAL | name Moulin du Val, gln DEMO-GLN-VAL |
+| Site | SITE-RIVE | name Épicerie Rive, gln DEMO-GLN-RIVE |
+| Certificate | CERT-77 | scheme Organic Horizon, status valid, valid_to 2027-12-31 |
+
+```mermaid
+flowchart LR
+  ble["Lot BLE-0457"] -->|INPUT_OF step P-MILL-118| far["Lot FAR-118"]
+  far -->|INPUT_OF step P-BAKE-031| bis["Lot BIS-031"]
+  mill["ProcessStep P-MILL-118"] -->|CONSUMES| ble
+  mill -->|PRODUCES| far
+  bake["ProcessStep P-BAKE-031"] -->|CONSUMES| far
+  bake -->|PRODUCES| bis
+  ship2["Shipment SHIP-BIS-2"] -->|CONTAINS| bis
+  ship2 -->|SHIPPED_TO| rive["Site SITE-RIVE"]
+  cert["Certificate CERT-77"] -->|COVERS| ble
+  cert -->|COVERS| far
+  cert -->|COVERS| bis
+  cert -->|ISSUED_BY| horizon["Actor ACT-HORIZON"]
+  classDef lotNode fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  classDef certNode fill:#C4A35A,stroke:#8C7332,color:#1C1408;
+  class ble,far,bis lotNode;
+  class cert certNode;
+```
+
+### 4.4 Document chunks and embeddings
+
+Certificate and audit texts from the `documents` table are split into paragraphs. Each paragraph becomes a `Chunk` with the ids it mentions (`entity_ids`), so a text hit can be joined back to the graph. In mock mode the embedding is a 64-dimension hashing vector ([`retrieval/embeddings.py`](src/agritrace/retrieval/embeddings.py)), so no network call is needed. In Neo4j the same vector is stored on `Chunk.embedding` and indexed:
+
+```cypher
+CREATE VECTOR INDEX chunk_embedding IF NOT EXISTS FOR (c:Chunk) ON (c.embedding)
+OPTIONS {indexConfig: { `vector.dimensions`: 64, `vector.similarity_function`: 'cosine' }}
+```
+
+The chunk for `CERT-77` (embedding trimmed to its first 4 of 64 values):
+
+```json
+{
+  "id": "CHK-DOC-CERT-77-0",
+  "document_id": "DOC-CERT-77",
+  "text": "Certificate CERT-77. Scheme: Organic Horizon (fictional). Issuer: Organisme Horizon. Holder: Fournil Lumière. Status: valid. Validity: 2025-04-01 to 2027-12-31. Scope of the batch genealogy: wheat lot BLE-0457 harvested at Ferme des Collines, milled as flour FAR-118 at Moulin du Val, baked as biscuits BIS-031 at Fournil Lumière. The scope is only this wheat, flour, and biscuit genealogy.",
+  "entity_ids": ["CERT-77", "BLE-0457", "FAR-118", "BIS-031", "ACT-LUMIERE"],
+  "embedding": [-0.2917, 0.1459, 0.0, 0.0, "..."]
+}
+```
+
+Four chunks exist in the seed: `CHK-DOC-CERT-77-0`, `CHK-DOC-CERT-78-0`, `CHK-DOC-AUDIT-MILL-0`, and `CHK-DOC-RECALL-PLAYBOOK-0`.
+
+### 4.5 GraphRAG query
+
+A question goes two ways at once. The structural part is answered by a graph walk and, for regulators and auditors, by a text-to-Cypher draft that must pass [`validate_cypher`](src/agritrace/security/cypher_guard.py). The prose part is answered by chunk search. The answer is then built from both results only.
+
+Question: `Trace BIS-031 upstream`. Drafted Cypher (mock writer) after the guard, and the rows it returns:
+
+```json
+{
+  "ok": true,
+  "cypher": "MATCH (origin:Lot)-[:INPUT_OF*1..6]->(lot:Lot {id: $lot_id})\nRETURN origin.id AS origin_lot, lot.id AS lot_id\nLIMIT 25",
+  "params": {"lot_id": "BIS-031"},
+  "error": "",
+  "rows": [
+    {"origin_lot": "FAR-118", "lot_id": "BIS-031"},
+    {"origin_lot": "BLE-0457", "lot_id": "BIS-031"}
+  ]
+}
+```
+
+A write attempt never runs. `validate_cypher("MATCH (l:Lot) DETACH DELETE l RETURN l LIMIT 5")` raises:
+
+```text
+CypherRejected: only a read-only MATCH query is allowed
+```
+
+The graph walk itself (`store.trace("BIS-031", "upstream")`, trimmed):
+
+```json
+{
+  "root_lot_id": "BIS-031", "direction": "upstream", "product_name": "Biscuits sablés",
+  "path_lot_ids": ["BLE-0457", "FAR-118", "BIS-031"],
+  "upstream_lot_ids": ["FAR-118", "BLE-0457"],
+  "process_ids": ["P-BAKE-031", "P-COMM-0457", "P-MILL-118"],
+  "shipment_ids": ["SHIP-BIS-1", "SHIP-BIS-2"],
+  "certificate_ids": ["CERT-77"],
+  "origin_actor_name": "Ferme des Collines",
+  "retail_sites": ["Épicerie Rive (SITE-RIVE)"]
+}
+```
+
+Chunk search for `Which certificate covers the biscuits and the wheat genealogy?` returns the `CERT-77` chunk first (`"score": 0.1552`), with its `entity_ids` linking back to the three lots.
+
+### 4.6 LangGraph state, node by node
+
+The workflow state is the typed dict `GraphState` in [`agents/graph.py`](src/agritrace/agents/graph.py). Each node returns only the keys it changes, and the `MemorySaver` checkpointer keeps the state of the thread between the interrupt and the resume. Below are the real updates for `What is the downstream recall impact of BLE-0457?` (trimmed).
+
+Input:
+
+```json
+{"question": "What is the downstream recall impact of BLE-0457?",
+ "principal": {"role": "regulator", "actor_id": null, "name": "Demo regulator"},
+ "status": "running", "citations": [], "injection_flags": [], "documents": []}
+```
+
+After `route`: the lot id is extracted from the text and the access check passes.
+
+```json
+{"route": "recall", "lot_id": "BLE-0457", "direction": "downstream",
+ "certificate_id": null, "injection_flags": [], "status": "running"}
+```
+
+After `recall`: trace, compliance, and a proposal are stored. Nothing is issued yet.
+
+```json
+{"trace": {"root_lot_id": "BLE-0457", "downstream_lot_ids": ["FAR-118", "BIS-031"], "...": "..."},
+ "compliance": {"lot_id": "BLE-0457", "compliant": true, "certificate_ids": ["CERT-77"], "flags": []},
+ "recall_proposal": {"root_lot_id": "BLE-0457", "downstream_lot_ids": ["FAR-118", "BIS-031"],
+   "retail_sites": ["Épicerie Rive (SITE-RIVE)"], "shipment_ids": ["SHIP-BIS-1", "SHIP-BIS-2"],
+   "certificate_note": "CERT-77 is still valid until 2027-12-31.", "certificate_ids": ["CERT-77"]},
+ "citations": [{"kind": "node", "id": "BLE-0457", "label": "Lot", "detail": "lineage"}, "..."],
+ "status": "needs_approval"}
+```
+
+At `approval`: the graph stops on `interrupt(...)` and waits. The stream emits an `__interrupt__` update whose `Interrupt.value` is:
+
+```json
+{"type": "recall_approval",
+ "question": "Approve this recall recommendation? Reply approve or reject.",
+ "proposal": {"root_lot_id": "BLE-0457", "downstream_lot_ids": ["FAR-118", "BIS-031"], "...": "..."}}
+```
+
+After resume with `approve` (regulator):
+
+```json
+{"human_decision": "approve", "approval_note": "", "status": "running"}
+```
+
+After `compose`:
+
+```json
+{"answer": "Recall issued for BLE-0457. Affected lots: FAR-118, BIS-031. Approved by regulator.\n\nMock LLM: the grounded answer above is the system of record for this demo.",
+ "citations": ["... same 16 ids as above ..."], "status": "complete"}
+```
+
+On the `trace` route the path is shorter: `route` sets `"route": "trace", "direction": "upstream"`, then `trace` adds the `trace` payload shown in 4.5, then `compose` writes the answer.
+
+### 4.7 MCP tool calls and the A2A card
+
+The three MCP tools in [`mcp/server.py`](src/agritrace/mcp/server.py) call the same service as the API and return JSON strings. An empty `actor_id` means the demo regulator. The same row-level access rules apply, so a retailer asking about a lot it never received gets an error instead of data.
+
+`trace_lot(lot_id="BIS-031", direction="upstream")` returns the trace payload from 4.5.
+
+`check_certificates(lot_id="BIS-031")`:
+
+```json
+{"lot_id": "BIS-031", "as_of": "2026-11-13", "compliant": true, "schemes": ["Organic Horizon"],
+ "product_name": "Biscuits sablés", "site_name": "Fournil Lumière", "site_id": "SITE-LUMIERE",
+ "upstream_lot_ids": ["FAR-118", "BLE-0457"], "certificate_ids": ["CERT-77"],
+ "certificate_summaries": ["CERT-77 (Organic Horizon, status valid, valid_to 2027-12-31)"], "flags": []}
+```
+
+`search_documents(query="mixed lots mill audit", k=1)`:
+
+```json
+[{"id": "CHK-DOC-AUDIT-MILL-0", "document_id": "DOC-AUDIT-MILL",
+  "text": "Mill audit AUD-MILL-2026 of Moulin du Val (SITE-VAL), 2026-09-12. Auditor: Atelier Audit Nord. Result: major_nonconformity. Finding: process P-MIX-221 mixed wheat BLE-0881, covered only by expired certificate CERT-78, with wheat BLE-0902. ...",
+  "entity_ids": ["AUD-MILL-2026", "FAR-221", "BLE-0881", "BLE-0902", "CERT-78", "SITE-VAL", "P-MIX-221"],
+  "score": 0.0972}]
+```
+
+`trace_lot(lot_id="OIL-009", actor_id="ACT-RIVE")`:
+
+```json
+{"error": "retailer cannot access lot OIL-009", "lot_id": "OIL-009"}
+```
+
+A2A card at `GET /.well-known/agent-card.json` ([`a2a/card.py`](src/agritrace/a2a/card.py), trimmed):
+
+```json
+{"protocol": "a2a-minimal-0.1", "name": "AgriTrace recall assistant",
+ "url": "http://127.0.0.1:8000/a2a/tasks", "version": "0.1.0",
+ "capabilities": {"streaming": false, "humanInTheLoop": true},
+ "skills": [{"id": "trace_lot", "name": "Trace a lot"},
+            {"id": "check_certificates", "name": "Check certificates"},
+            {"id": "search_documents", "name": "Search documents"}]}
+```
+
+Response of `POST /a2a/tasks` with the task `t-77` from section 9 (citations trimmed):
+
+```json
+{"protocol": "a2a-minimal-0.1", "id": "t-77", "status": "complete",
+ "message": {"role": "agent", "parts": [{"type": "text", "text": "Upstream trace of BIS-031 (Biscuits sablés).\nLots: BLE-0457, FAR-118, BIS-031.\n..."}]},
+ "citations": [{"kind": "node", "id": "BLE-0457", "label": "Lot", "detail": "lineage"}, "..."]}
+```
+
+### 4.8 Final grounded answer with citations
+
+`POST /ask` returns an `AskResponse`. The text is rendered from the tool payloads, every citation is an id that a tool returned, and the mock narrative line is checked so it cannot add ids. For a regulator the response also carries the guarded Cypher and its rows, and every call gets an audit event id.
+
+```json
+{
+  "status": "complete",
+  "route": "trace",
+  "answer": "Upstream trace of BIS-031 (Biscuits sablés).\nLots: BLE-0457, FAR-118, BIS-031.\nPath: BLE-0457 -> FAR-118 -> BIS-031.\nOrigin: BLE-0457 at Ferme des Collines (SITE-COLLINES), actor ACT-COLLINES.\nCertificates: CERT-77.\nRetail sites: Épicerie Rive (SITE-RIVE).\nShipments: SHIP-BIS-1, SHIP-BIS-2.\n\nMock LLM: the grounded answer above is the system of record for this demo.",
+  "citations": [
+    {"kind": "node", "id": "BLE-0457", "label": "Lot", "detail": "lineage"},
+    {"kind": "node", "id": "FAR-118", "label": "Lot", "detail": "lineage"},
+    {"kind": "node", "id": "BIS-031", "label": "Lot", "detail": "lineage"},
+    {"kind": "node", "id": "SITE-COLLINES", "label": "Site", "detail": "place"},
+    {"kind": "node", "id": "CERT-77", "label": "Certificate", "detail": "coverage"},
+    {"kind": "node", "id": "SHIP-BIS-1", "label": "Shipment", "detail": "movement"},
+    "..."
+  ],
+  "recall_proposal": null,
+  "cypher": {"ok": true, "params": {"lot_id": "BIS-031"}, "rows": [{"origin_lot": "FAR-118", "lot_id": "BIS-031"}, {"origin_lot": "BLE-0457", "lot_id": "BIS-031"}], "...": "..."},
+  "principal": {"role": "regulator", "actor_id": null, "name": "Demo regulator"},
+  "injection_flags": [],
+  "audit_event_id": "e4a18b394530",
+  "thread_id": "readme-trace"
+}
+```
+
+`audit_event_id` and `thread_id` change on every run.
+
+### 4.9 Evaluation case format
+
+Each case in [`src/agritrace/eval/dataset.json`](src/agritrace/eval/dataset.json) states the expected status, the ids and phrases that must appear (in the answer or the citations), and the ids and phrases that must not. Forbidden ids are what catch a wrong walk, for example the mixed flour `FAR-221` leaking into the biscuit trace.
+
+```json
+{
+  "id": "recall-wheat",
+  "question": "What is the downstream recall impact of BLE-0457?",
+  "status": "needs_approval",
+  "expect_ids": ["BLE-0457", "FAR-118", "BIS-031", "CERT-77", "SITE-RIVE"],
+  "expect_phrases": ["pending human approval", "FAR-118", "BIS-031", "CERT-77"],
+  "forbid_ids": ["FAR-221", "OIL-009"],
+  "forbid_phrases": ["Recall issued"]
+}
+```
+
+Output of `python -m agritrace.eval.runner`:
+
+```text
+eval 7/7
+  ok upstream-biscuits status=complete
+  ok downstream-wheat status=complete
+  ok cert-77-biscuits status=complete
+  ok recall-wheat status=needs_approval
+  ok expired-catalog status=complete
+  ok mill-audit status=complete
+  ok broken-oil status=complete
+```
+
+---
+
+## 5. Architecture
+
+### 5.1 What this repository runs
 
 ![Containers: SQL ERP, ingestion, Neo4j, vectors, GraphRAG, LangGraph, API, MCP and A2A, human approval](docs/assets/architecture.svg)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'secondaryColor': '#F4E8C1', 'tertiaryColor': '#E7F0EA', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart LR
   erp["SQLite ERP"]
   ingest["Ingestion and quality checks"]
-  graph["Neo4j property graph"]
+  neo4jGraph["Neo4j property graph"]
   vec["Chunk vectors"]
   rag["GraphRAG"]
   agents["LangGraph supervisor"]
@@ -196,9 +573,9 @@ flowchart LR
   a2a["A2A card and tasks"]
   human["Human approval"]
 
-  erp --> ingest --> graph
+  erp --> ingest --> neo4jGraph
   ingest --> vec
-  graph --> rag
+  neo4jGraph --> rag
   vec --> rag
   rag --> agents
   agents --> api
@@ -208,7 +585,7 @@ flowchart LR
   human --> agents
 
   classDef box fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
-  class erp,ingest,graph,vec,rag,agents,api,mcp,a2a,human box;
+  class erp,ingest,neo4jGraph,vec,rag,agents,api,mcp,a2a,human box;
 ```
 
 | Piece | Role in this repo |
@@ -222,32 +599,30 @@ flowchart LR
 | FastAPI | `/ask`, `/lots/...`, `/cypher`, MCP is a separate stdio process, A2A is HTTP. |
 | Human | Required before the text “Recall issued” is produced. |
 
-### 4.2 Context, containers, deployment
+### 5.2 Context, containers, deployment
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'secondaryColor': '#F4E8C1', 'tertiaryColor': '#E7F0EA', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart TB
   lead["Quality lead"]
   auditor["Auditor"]
-  system["AgriTrace"]
+  agritrace["AgriTrace"]
   llm["OpenAI-compatible LLM or mock"]
-  lead --> system
-  auditor --> system
-  system --> llm
+  lead --> agritrace
+  auditor --> agritrace
+  agritrace --> llm
   classDef person fill:#C4A35A,stroke:#8C7332,color:#1C1408;
   classDef sys fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
   class lead,auditor person;
-  class system,llm sys;
+  class agritrace,llm sys;
 ```
 
 `compose.yaml` runs Neo4j 5.26 and the API. Browser ports are bound to `127.0.0.1`. The API listens on `0.0.0.0:$PORT` inside the container. CI does not start Docker: it sets `GRAPH_BACKEND=memory` and `LLM_MODE=mock`.
 
-### 4.3 Sequence: trace, then a recall that waits
+### 5.3 Sequence: trace, then a recall that waits
 
 ![Sequence: ask, trace downstream, note that CERT-77 is valid, interrupt, human approves, recall issued](docs/assets/sequence-recall.svg)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'actorBkg': '#1F4D3A', 'actorTextColor': '#F7F3E8', 'signalColor': '#1C1408', 'fontFamily': 'Georgia, serif'}}}%%
 sequenceDiagram
   actor User
   participant API
@@ -267,14 +642,13 @@ sequenceDiagram
 
 Until resume, the answer says **pending** and does **not** say the recall was issued.
 
-### 4.4 Target architecture for a certification company
+### 5.4 Target architecture for a certification company
 
 This is a **target**, not the deployment of this repository. The repo is the reference slice (one SQL file, one graph, one process, a mock model).
 
 ![Side-by-side business and technical target](docs/assets/target-architecture.svg)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'secondaryColor': '#F4E8C1', 'tertiaryColor': '#E7F0EA', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart TB
   subgraph business [Business view]
     producers["Producers"]
@@ -311,11 +685,11 @@ flowchart TB
 | Certify | Certificate node with `valid_from` / `valid_to`, linked to lots |
 | Audit | Unstructured report chunked, embedded, linked to the site and lots |
 
-Cross-cutting on the target platform: an API gateway with real identity, row-level security enforced in the graph query, an append-only audit log, OpenTelemetry to a collector, policy checks on the LLM gateway, and CI/CD that promotes ontology versions. Section 9 is the control list. Section 16 says which of those controls are only sketched here.
+Cross-cutting on the target platform: an API gateway with real identity, row-level security enforced in the graph query, an append-only audit log, OpenTelemetry to a collector, policy checks on the LLM gateway, and CI/CD that promotes ontology versions. Section 10 is the control list. Section 17 says which of those controls are only sketched here.
 
 ---
 
-## 5. Ontology and graph schema
+## 6. Ontology and graph schema
 
 ![Node labels: Actor, Site, Lot, Product, ProcessStep, Shipment, Certificate, Audit, Document, Chunk](docs/assets/ontology-schema.svg)
 
@@ -362,12 +736,11 @@ The Cypher guard accepts this query. The memory backend returns the hero row. Ne
 
 ---
 
-## 6. Agents
+## 7. Agents
 
 ![LangGraph nodes: route, trace, compliance, documents, recall, approval, compose](docs/assets/langgraph.svg)
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1F4D3A', 'primaryTextColor': '#F7F3E8', 'primaryBorderColor': '#14352A', 'lineColor': '#C4A35A', 'secondaryColor': '#F4E8C1', 'tertiaryColor': '#E7F0EA', 'fontFamily': 'Georgia, serif'}}}%%
 flowchart TD
   route["Supervisor / route"]
   trace["Traceability agent"]
@@ -380,10 +753,10 @@ flowchart TD
   route --> compliance --> compose
   route --> documents --> compose
   route --> recall --> approval --> compose
-  classDef node fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
-  classDef stop fill:#8C4A3A,stroke:#5C3026,color:#F7F3E8;
-  class route,trace,compliance,documents,recall,compose node;
-  class approval stop;
+  classDef agentNode fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  classDef humanStop fill:#8C4A3A,stroke:#5C3026,color:#F7F3E8;
+  class route,trace,compliance,documents,recall,compose agentNode;
+  class approval humanStop;
 ```
 
 | Node | Job |
@@ -404,7 +777,7 @@ The interrupt is inside the approval node, **after** the proposal is stored and 
 
 ---
 
-## 7. Retrieval
+## 8. Retrieval
 
 Hybrid retrieval is two tools, then a grounded paragraph.
 
@@ -421,7 +794,7 @@ Guardrail limits, stated plainly:
 
 ---
 
-## 8. Tools
+## 9. Tools
 
 | Tool | What it is | Why it is here | Where |
 | --- | --- | --- | --- |
@@ -465,7 +838,7 @@ Guardrail limits, stated plainly:
 
 **Why.** The catalog has a version (`owl:versionInfo "0.1.0"`) that is copied onto graph nodes at ingest (`ontology_version`). People can open the file in Protégé if they want a diagram editor. The demo does not need it.
 
-**Role.** Classes and relations in section 5. EPCIS words (`bizStep`, `eventTime`, business location) are annotation properties, not an import of the GS1 ontology.
+**Role.** Classes and relations in section 6. EPCIS words (`bizStep`, `eventTime`, business location) are annotation properties, not an import of the GS1 ontology.
 
 **Alternative.** A spreadsheet of column meanings. It would not carry relation domains or a version IRI.
 
@@ -573,7 +946,7 @@ The card’s `protocol` field is `a2a-minimal-0.1` so nobody confuses it with a 
 
 ---
 
-## 9. Security and governance
+## 10. Security and governance
 
 | Control | What the demo actually does |
 | --- | --- |
@@ -598,7 +971,7 @@ Demo open access (`AGRITRACE_DEMO_OPEN=1`) maps a missing actor to the regulator
 
 ---
 
-## 10. Design choices and limits
+## 11. Design choices and limits
 
 <details>
 <summary>Graph beside relational, not instead of it</summary>
@@ -645,7 +1018,7 @@ Full text of each decision is also in [`docs/adr/`](docs/adr/).
 
 ---
 
-## 11. Evaluation
+## 12. Evaluation
 
 [`src/agritrace/eval/dataset.json`](src/agritrace/eval/dataset.json) holds seven questions. The runner checks status, expected ids (in the answer or the citations), expected phrases, forbidden ids, and forbidden phrases. Exit code is 1 if any case fails. `pytest` calls the same runner.
 
@@ -663,7 +1036,7 @@ On the mock stack this set scores **7/7**. That number measures the deterministi
 
 ---
 
-## 12. Observability
+## 13. Observability
 
 Spans today:
 
@@ -675,11 +1048,11 @@ Spans today:
 | `retrieval.search` | document search |
 | `agent.ask` | one user turn, attribute `enduser.role` |
 
-No exporter is configured unless you opt in (section 8). The audit log is the business trace of decisions; OpenTelemetry is the technical trace of latency and failures. They are not the same store.
+No exporter is configured unless you opt in (section 9). The audit log is the business trace of decisions; OpenTelemetry is the technical trace of latency and failures. They are not the same store.
 
 ---
 
-## 13. Continuous integration
+## 14. Continuous integration
 
 Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
@@ -696,7 +1069,7 @@ Environment for steps 5 and 6: `LLM_MODE=mock`, `GRAPH_BACKEND=memory`, `AGRITRA
 
 ---
 
-## 14. Quickstart
+## 15. Quickstart
 
 ### Docker Compose (Neo4j + API)
 
@@ -711,7 +1084,7 @@ docker compose exec app python -m agritrace.demo
 
 API: `http://127.0.0.1:8000/health`. Neo4j Browser: `http://127.0.0.1:7474` (user `neo4j`).
 
-`ingest` loads the ERP extract if you want that step on its own. The API also loads on startup. `demo` prints the questions in section 15.
+`ingest` loads the ERP extract if you want that step on its own. The API also loads on startup. `demo` prints the questions in section 16.
 
 ### Same demo without Docker (what CI runs)
 
@@ -728,7 +1101,7 @@ MCP stdio server: `python -m agritrace.mcp.server`.
 
 ---
 
-## 15. Example questions and answers
+## 16. Example questions and answers
 
 Captured from `python -m agritrace.demo` in mock mode. The narrative line is the mock model. The paragraphs above it are the grounded tool output.
 
@@ -807,7 +1180,7 @@ A retailer at Épicerie Rive (`ACT-RIVE`) can trace `BIS-031` and cannot trace `
 
 ---
 
-## 16. Roadmap
+## 17. Roadmap
 
 **Done in this repository**
 
@@ -836,7 +1209,7 @@ A retailer at Épicerie Rive (`ACT-RIVE`) can trace `BIS-031` and cannot trace `
 
 ---
 
-## 17. Résumé en français
+## 18. Résumé en français
 
 <details>
 <summary>Lire le résumé</summary>
@@ -847,7 +1220,7 @@ La chaîne de référence est le blé `BLE-0457`, moulu en farine `FAR-118`, pui
 
 Le dépôt montre une ontologie OWL (Turtle), un extrait SQL, un graphe Neo4j, une recherche hybride (parcours + vecteurs), des agents LangGraph, trois outils MCP, et une carte A2A minimale. Les tests et l’intégration continue tournent sans clé d’API (`LLM_MODE=mock`).
 
-Le texte complet en français est dans [`docs/fr/README_fr.md`](docs/fr/README_fr.md), [`docs/fr/concepts.md`](docs/fr/concepts.md), [`docs/fr/architecture.md`](docs/fr/architecture.md), [`docs/fr/outils.md`](docs/fr/outils.md), [`docs/fr/securite-gouvernance.md`](docs/fr/securite-gouvernance.md) et [`docs/fr/architecture-cible.md`](docs/fr/architecture-cible.md).
+La traduction complète de ce README est dans [`README.fr.md`](README.fr.md). Des pages courtes en français sont aussi dans [`docs/fr/README_fr.md`](docs/fr/README_fr.md), [`docs/fr/concepts.md`](docs/fr/concepts.md), [`docs/fr/architecture.md`](docs/fr/architecture.md), [`docs/fr/outils.md`](docs/fr/outils.md), [`docs/fr/securite-gouvernance.md`](docs/fr/securite-gouvernance.md) et [`docs/fr/architecture-cible.md`](docs/fr/architecture-cible.md).
 
 </details>
 

@@ -1,6 +1,6 @@
 # Ontology
 
-Canonical copy: [README §5](../README.md#5-ontology-and-graph-schema).
+Canonical copy: [README §6](../README.md#6-ontology-and-graph-schema).
 
 File: [`ontology/traceability.ttl`](../ontology/traceability.ttl), `owl:versionInfo "0.1.0"`.
 
