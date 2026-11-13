@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Evaluation — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Evaluation</h1>
+<p>Canonical copy: <a href="../README.md#11-evaluation">README §11</a>.</p>
+<p><code>python -m agritrace.eval.runner</code> loads <code>src/agritrace/eval/dataset.json</code> and scores seven questions against the mock service. A case fails when a status, expected id, expected phrase, forbidden id, or forbidden phrase does not match. Pytest runs the same function.</p>
+<table><thead><tr><th>Id</th><th>Looks for</th></tr></thead><tbody>
+<tr><td>upstream-biscuits</td><td><code>BIS-031</code> upstream contains <code>FAR-118</code>, <code>BLE-0457</code>, <code>CERT-77</code>, Ferme des Collines</td></tr>
+<tr><td>downstream-wheat</td><td><code>FAR-118</code>, <code>BIS-031</code>, Épicerie Rive</td></tr>
+<tr><td>cert-77-biscuits</td><td>compliant, <code>CERT-77</code>, <code>2027-12-31</code></td></tr>
+<tr><td>recall-wheat</td><td><code>needs_approval</code>, no “Recall issued”</td></tr>
+<tr><td>expired-catalog</td><td><code>CERT-78</code> expired, <code>CERT-77</code> not described as expired</td></tr>
+<tr><td>mill-audit</td><td><code>major_nonconformity</code>, <code>FAR-221</code>, <code>CERT-78</code></td></tr>
+<tr><td>broken-oil</td><td><code>broken_chain</code> at Pressoir des Olivettes</td></tr>
+</tbody></table>
+<p>Mock mode scores 7/7. That is tool accuracy, not hosted-model accuracy.</p>
+</body>
+</html>

@@ -1,0 +1,62 @@
+{
+  "cases": [
+    {
+      "id": "upstream-biscuits",
+      "question": "Trace BIS-031 upstream",
+      "status": "complete",
+      "expect_ids": ["BIS-031", "FAR-118", "BLE-0457", "CERT-77", "SITE-COLLINES", "ACT-COLLINES"],
+      "expect_phrases": ["BLE-0457", "FAR-118", "Ferme des Collines", "CERT-77"],
+      "forbid_ids": ["BLE-0881", "FAR-221", "OIL-009", "CERT-78"]
+    },
+    {
+      "id": "downstream-wheat",
+      "question": "Which lots are downstream of wheat lot BLE-0457?",
+      "status": "complete",
+      "expect_ids": ["BLE-0457", "FAR-118", "BIS-031", "SITE-RIVE"],
+      "expect_phrases": ["FAR-118", "BIS-031", "Épicerie Rive"],
+      "forbid_ids": ["FAR-221", "OIL-009", "BLE-0881"]
+    },
+    {
+      "id": "cert-77-biscuits",
+      "question": "Is biscuit lot BIS-031 covered by CERT-77, and is that certificate valid on 2026-11-13?",
+      "status": "complete",
+      "expect_ids": ["BIS-031", "FAR-118", "BLE-0457", "CERT-77"],
+      "expect_phrases": ["is compliant", "CERT-77", "2027-12-31", "No expired certificate"],
+      "forbid_ids": ["CERT-78", "FAR-221"],
+      "forbid_phrases": ["is non-compliant"]
+    },
+    {
+      "id": "recall-wheat",
+      "question": "What is the downstream recall impact of BLE-0457?",
+      "status": "needs_approval",
+      "expect_ids": ["BLE-0457", "FAR-118", "BIS-031", "CERT-77", "SITE-RIVE"],
+      "expect_phrases": ["pending human approval", "FAR-118", "BIS-031", "CERT-77"],
+      "forbid_ids": ["FAR-221", "OIL-009"],
+      "forbid_phrases": ["Recall issued"]
+    },
+    {
+      "id": "expired-catalog",
+      "question": "Which certificates are expired?",
+      "status": "complete",
+      "expect_ids": ["CERT-78"],
+      "expect_phrases": ["CERT-78", "expired", "2026-03-01"],
+      "forbid_phrases": ["CERT-77 is expired"]
+    },
+    {
+      "id": "mill-audit",
+      "question": "What did the mill audit say about mixed lots?",
+      "status": "complete",
+      "expect_ids": ["DOC-AUDIT-MILL", "CHK-DOC-AUDIT-MILL-0", "FAR-221", "CERT-78"],
+      "expect_phrases": ["major_nonconformity", "mixed", "CERT-78", "FAR-221"],
+      "forbid_ids": ["BIS-031", "BLE-0457"]
+    },
+    {
+      "id": "broken-oil",
+      "question": "Where was OIL-009 produced and is the chain complete?",
+      "status": "complete",
+      "expect_ids": ["OIL-009", "SITE-PRESS", "P-PRESS-009"],
+      "expect_phrases": ["non-compliant", "broken_chain", "Pressoir des Olivettes"],
+      "forbid_phrases": ["is compliant"]
+    }
+  ]
+}

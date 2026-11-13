@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Tools — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Tools</h1>
+<p>Canonical copy: <a href="../README.md#8-tools">README §8</a>. Summary first, then one section per tool.</p>
+<table><thead><tr><th>Tool</th><th>Role here</th></tr></thead><tbody>
+<tr><td>Neo4j + Cypher + vector index</td><td>Queryable property graph</td></tr>
+<tr><td>OWL / Turtle / rdflib</td><td>Versioned vocabulary</td></tr>
+<tr><td>GS1 EPCIS (ideas)</td><td>What / when / where / why</td></tr>
+<tr><td>SQLite, Postgres-shaped SQL</td><td>ERP system of record</td></tr>
+<tr><td>Python 3.11 + Pydantic</td><td>Typed records</td></tr>
+<tr><td>LangChain</td><td>Prompt templates</td></tr>
+<tr><td>LangGraph</td><td>Supervisor, checkpoint, interrupt</td></tr>
+<tr><td>MCP SDK</td><td>Three tools</td></tr>
+<tr><td>A2A minimal</td><td>Agent card and task POST</td></tr>
+<tr><td>FastAPI</td><td>HTTP API</td></tr>
+<tr><td>Streamlit</td><td>Small UI</td></tr>
+<tr><td>OpenTelemetry</td><td>Spans</td></tr>
+<tr><td>LangSmith</td><td>Optional, off by default</td></tr>
+<tr><td>OpenAI-compatible LLM and mock</td><td>Gateway</td></tr>
+<tr><td>Docker Compose</td><td>Neo4j + API</td></tr>
+<tr><td>pytest</td><td>Tests including the hero chain</td></tr>
+<tr><td>GitHub Actions</td><td>Lint, types, tests, eval</td></tr>
+<tr><td>uv, ruff, mypy</td><td>Environment, lint, types</td></tr>
+<tr><td>Mermaid</td><td>Diagrams in the README</td></tr>
+</tbody></table>
+<h2>Neo4j, Cypher, vector index</h2>
+<p>A property graph. Chosen because downstream of <code>BLE-0457</code> is a walk, not a join. Files: <code>src/agritrace/graph/schema.py</code>, <code>src/agritrace/graph/neo4j_store.py</code>. Constraints require unique <code>id</code>. Index <code>chunk_embedding</code> is cosine over 64 mock dimensions.</p>
+<pre><code>CREATE VECTOR INDEX chunk_embedding IF NOT EXISTS
+FOR (c:Chunk) ON (c.embedding)
+OPTIONS {indexConfig: { `vector.dimensions`: 64, `vector.similarity_function`: &#x27;cosine&#x27; }}</code></pre>
+<p>Alternative: recursive SQL only. Kept as the ledger, not as the traversal API.</p>
+<h2>OWL, Turtle, rdflib</h2>
+<p>The vocabulary is not a tool you “run”; OWL is the language, Turtle the syntax, rdflib the parser. File: <code>ontology/traceability.ttl</code>. Loader: <code>src/agritrace/ontology/loader.py</code>.</p>
+<pre><code>agr:Lot a owl:Class ;
+    rdfs:label &quot;Lot&quot;@en ;
+    rdfs:comment &quot;The running example is wheat BLE-0457, flour FAR-118, biscuits BIS-031.&quot;@en .</code></pre>
+<p>Alternative: a wiki table. It would not version as <code>owl:versionInfo</code>.</p>
+<h2>GS1 EPCIS</h2>
+<p>Not a library in this repo. The process step carries <code>event_time</code> and <code>biz_step</code> so a supply-chain reader recognises commissioning and transformation. No official GS1 package is imported, and no real keys are used.</p>
+<h2>SQLite and Postgres</h2>
+<p><code>src/agritrace/data/schema.sql</code> and <code>erp.py</code>. Ingest always round-trips through SQLite. Postgres is the production shape of the same columns; the driver is not connected (roadmap).</p>
+<pre><code>CREATE TABLE lots (
+    id TEXT PRIMARY KEY,
+    product_id TEXT NOT NULL REFERENCES products(id),
+    quantity REAL NOT NULL,
+    produced_on TEXT NOT NULL,
+    site_id TEXT NOT NULL REFERENCES sites(id)
+);</code></pre>
+<h2>Python and Pydantic</h2>
+<p><code>Lot</code>, <code>Certificate</code>, and <code>AskResponse</code> in <code>src/agritrace/models.py</code>. They are what SQL rows become before the graph load.</p>
+<h2>LangChain</h2>
+<p><code>ChatPromptTemplate</code> in <code>llm/provider.py</code> and <code>retrieval/text_to_cypher.py</code>. The prompt carries the schema card and forbids writes. The HTTP client, not a vendor chain, posts the messages when <code>LLM_MODE=openai</code>.</p>
+<h2>LangGraph</h2>
+<p><code>src/agritrace/agents/graph.py</code>. <code>StateGraph</code>, <code>MemorySaver</code>, <code>interrupt</code>, <code>Command</code>. The recall node stores the proposal; the next node interrupts.</p>
+<h2>MCP</h2>
+<p><code>src/agritrace/mcp/server.py</code>. SDK 2.x <code>MCPServer</code>. Tools: <code>trace_lot</code>, <code>check_certificates</code>, <code>search_documents</code>.</p>
+<pre><code>TOOLS = {
+    &quot;trace_lot&quot;: trace_lot,
+    &quot;check_certificates&quot;: check_certificates,
+    &quot;search_documents&quot;: search_documents,
+}</code></pre>
+<p>Alternative: a private JSON-RPC. MCP is the interop surface.</p>
+<h2>A2A</h2>
+<p><code>src/agritrace/a2a/card.py</code>. Protocol id <code>a2a-minimal-0.1</code>. <code>GET /.well-known/agent-card.json</code>, <code>POST /a2a/tasks</code>. Not a full task lifecycle.</p>
+<h2>FastAPI</h2>
+<p><code>src/agritrace/api/main.py</code>. <code>POST /ask</code> runs the graph. <code>POST /ask/resume</code> continues a recall. <code>POST /cypher</code> is guarded.</p>
+<h2>Streamlit</h2>
+<p><code>ui/streamlit_app.py</code>. Same service, actor picker, approve / reject.</p>
+<h2>OpenTelemetry</h2>
+<p><code>src/agritrace/observability/otel.py</code>. <code>configure_telemetry</code> supports <code>none</code>, <code>console</code>, and <code>otlp</code>. Default is none.</p>
+<h2>LangSmith</h2>
+<p>No code dependency. <code>LANGCHAIN_TRACING_V2=true</code> plus <code>LANGCHAIN_API_KEY</code> lets LangChain emit traces. CI leaves this false.</p>
+<h2>LLM gateway and mock</h2>
+<p><code>src/agritrace/llm/provider.py</code>. <code>MockLLM</code> returns one sentence and invents no ids. <code>OpenAICompatibleLLM</code> posts to <code>/chat/completions</code>. Embeddings follow the same switch.</p>
+<h2>Docker Compose</h2>
+<p><code>compose.yaml</code>. Neo4j <code>5.26.0-community</code> with a healthcheck, API image depending on it, loopback ports, dev-only password fallback.</p>
+<h2>pytest</h2>
+<p><code>tests/test_hero_chain.py</code> and <code>tests/test_agents_security_api.py</code>. They lock <code>BLE-0457</code>, <code>FAR-118</code>, <code>BIS-031</code>, and <code>CERT-77</code>.</p>
+<h2>GitHub Actions</h2>
+<p><code>.github/workflows/ci.yml</code>. Python 3.11, ruff, mypy, pytest, eval, mock mode.</p>
+<h2>uv, ruff, mypy</h2>
+<p><code>pyproject.toml</code>. uv is optional for local 3.11. ruff line length 120. mypy <code>disallow_untyped_defs</code> on <code>src</code>.</p>
+<h2>Mermaid</h2>
+<p>Diagrams in the README use a shared forest/wheat <code>themeVariables</code> block so GitHub renders them. SVG/PNG twins: <code>docs/assets/</code>, built by <code>scripts/render_assets.py</code>.</p>
+</body>
+</html>

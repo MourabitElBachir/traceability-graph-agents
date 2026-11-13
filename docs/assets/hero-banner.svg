@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420" role="img">
+
+        <rect width="1400" height="420" fill="#14352A"/>
+        <rect x="0" y="0" width="14" height="420" fill="#C4A35A"/>
+        <text x="72" y="150" fill="#F7F3E8" font-family="Georgia, serif" font-size="64">AgriTrace</text>
+        <text x="72" y="210" fill="#C4A35A" font-family="Georgia, serif" font-size="28">Wheat BLE-0457 → flour FAR-118 → biscuits BIS-031</text>
+        <text x="72" y="258" fill="#F7F3E8" font-family="Georgia, serif" font-size="22">Certificate CERT-77 · knowledge graph · GraphRAG · multi-agent recall</text>
+        <text x="72" y="330" fill="#E7F0EA" font-family="Georgia, serif" font-size="18">Fictional agrifood data. No real company. No allocated GS1 keys.</text>
+        <circle cx="1120" cy="150" r="18" fill="#C4A35A"/>
+        <circle cx="1220" cy="150" r="18" fill="#F7F3E8"/>
+        <circle cx="1320" cy="150" r="18" fill="#C4A35A"/>
+        <line x1="1138" y1="150" x2="1202" y2="150" stroke="#C4A35A" stroke-width="3"/>
+        <line x1="1238" y1="150" x2="1302" y2="150" stroke="#C4A35A" stroke-width="3"/>
+        <text x="1090" y="210" fill="#F7F3E8" font-family="Georgia, serif" font-size="16">BLE-0457</text>
+        <text x="1190" y="210" fill="#F7F3E8" font-family="Georgia, serif" font-size="16">FAR-118</text>
+        <text x="1290" y="210" fill="#F7F3E8" font-family="Georgia, serif" font-size="16">BIS-031</text>
+        <text x="1160" y="270" fill="#C4A35A" font-family="Georgia, serif" font-size="16">CERT-77</text>
+        
+</svg>

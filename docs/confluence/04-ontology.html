@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Ontology — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Ontology</h1>
+<p>Canonical copy: <a href="../README.md#5-ontology-and-graph-schema">README §5</a>.</p>
+<p>File: <a href="../ontology/traceability.ttl"><code>ontology/traceability.ttl</code></a>, <code>owl:versionInfo &quot;0.1.0&quot;</code>.</p>
+<h2>Classes</h2>
+<p>Actor, Site, Product, Ingredient, Lot, ProcessStep, Shipment, Certificate, Audit, Document, Chunk.</p>
+<p><code>ProcessStep</code> specialises into commissioning (a harvest may have no input lot) and transformation (an empty input list is a broken chain).</p>
+<h2>Relations</h2>
+<p><code>OPERATES</code>, <code>PRODUCED_AT</code>, <code>OF_PRODUCT</code>, <code>CONSUMES</code>, <code>PRODUCES</code>, <code>PERFORMED_AT</code>, <code>INPUT_OF</code>, <code>CONTAINS</code>, <code>SHIPPED_FROM</code>, <code>SHIPPED_TO</code>, <code>COVERS</code>, <code>ISSUED_BY</code>, <code>HELD_BY</code>, <code>AUDITS</code>, <code>EVIDENCES</code>, <code>ABOUT</code>, <code>PART_OF</code>, <code>MENTIONS</code>, <code>INGREDIENT_OF</code>, <code>USED_IN</code>.</p>
+<p><code>INPUT_OF</code> is derived from a process that consumes one lot and produces another. The process remains the event of record.</p>
+<h2>EPCIS alignment</h2>
+<table><thead><tr><th>AgriTrace</th><th>EPCIS idea</th></tr></thead><tbody>
+<tr><td>Lot</td><td>object id + lot / quantity</td></tr>
+<tr><td>Site</td><td>business location</td></tr>
+<tr><td>ProcessStep.event_time</td><td>eventTime</td></tr>
+<tr><td>ProcessStep.biz_step</td><td>bizStep commissioning or transforming</td></tr>
+<tr><td>Shipment</td><td>shipping event</td></tr>
+<tr><td>Certificate, Audit</td><td>not core EPCIS; first-class here so validity is a query</td></tr>
+</tbody></table>
+<h2>Graph constraints</h2>
+<p>Each label has a unique <code>id</code> constraint. See <code>src/agritrace/graph/schema.py</code>. Chunks use vector index <code>chunk_embedding</code> (64 dimensions in mock mode).</p>
+<h2>Example</h2>
+<pre><code>MATCH (wheat:Lot {id: &#x27;BLE-0457&#x27;})-[:INPUT_OF]-&gt;(flour:Lot {id: &#x27;FAR-118&#x27;})
+      -[:INPUT_OF]-&gt;(biscuits:Lot {id: &#x27;BIS-031&#x27;})
+MATCH (cert:Certificate {id: &#x27;CERT-77&#x27;})-[:COVERS]-&gt;(biscuits)
+RETURN wheat.id, flour.id, biscuits.id, cert.id
+LIMIT 5</code></pre>
+<p><code>CERT-77</code> is valid from 2025-04-01 to 2027-12-31 and lists exactly those three lots.</p>
+<p><img alt="Schema picture" src="../assets/ontology-schema.svg"/></p>
+</body>
+</html>

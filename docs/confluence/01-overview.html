@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Overview — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Overview</h1>
+<p>AgriTrace is a fictional agrifood traceability demo for El Bachir Mourabit.</p>
+<p>Business question: where did a lot come from, where did it go, and is its certificate still valid?</p>
+<p>Running example, used in the seed, the tests, the eval set, and the README:</p>
+<pre><code>wheat BLE-0457 → flour FAR-118 → biscuits BIS-031
+certificate CERT-77, valid through 2027-12-31</code></pre>
+<p>The stack is a small OWL vocabulary, a SQL ERP extract, a property graph, hybrid GraphRAG, a LangGraph supervisor with a human interrupt before a recall, three MCP tools, and a minimal A2A card. Continuous integration runs with <code>LLM_MODE=mock</code> and no Neo4j.</p>
+<p>All names and lots are fictional. No client company is described.</p>
+<p>The long-form document is the <a href="../README.md">README</a>. Figures live in <a href="assets/">assets</a>.</p>
+<p><img alt="Hero" src="../assets/hero-banner.svg"/></p>
+</body>
+</html>

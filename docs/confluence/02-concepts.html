@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Concepts — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Concepts</h1>
+<p>Canonical copy: <a href="../README.md#2-concepts-in-plain-language">README</a>. This page is the teaching split.</p>
+<p>All names below are fictional. The running chain is wheat <code>BLE-0457</code> → flour <code>FAR-118</code> → biscuits <code>BIS-031</code>, certificate <code>CERT-77</code>.</p>
+<h2>Ontology</h2>
+<p>An ontology is a shared vocabulary: kinds of things, relations, and a few rules. It is not a product you install.</p>
+<p>OWL is a language for that vocabulary. RDF is the triple data model. Turtle is a text syntax. Protégé is an editor. This repository stores the vocabulary in <code>ontology/traceability.ttl</code> and reads it with rdflib. You do not need Protégé to run the demo.</p>
+<h2>Knowledge graph and property graph</h2>
+<p>The ontology is the empty vocabulary. The knowledge graph is the vocabulary plus facts (this lot, this mill, this certificate). Neo4j stores those facts as a property graph: nodes, relationships, and properties. That shape fits “what is downstream of <code>BLE-0457</code>?”.</p>
+<h2>GS1 EPCIS</h2>
+<p>EPCIS events answer what, when, where, and why. A process step here has an event time, a site, and a business step (<code>commissioning</code> or <code>transformation</code>). Certificates are extra nodes because EPCIS does not treat them as core events. Demo GLNs and GTINs are prefixed <code>DEMO-</code> and are not real GS1 keys.</p>
+<h2>GraphRAG and plain RAG</h2>
+<p>Plain RAG searches similar text. It will not reliably list <code>FAR-118</code> and <code>BIS-031</code> as the children of <code>BLE-0457</code>. GraphRAG walks the graph for that, and uses vectors only for prose such as the mill audit.</p>
+<h2>LangChain and LangGraph</h2>
+<p>LangChain builds the prompts (text-to-Cypher, short narrative). LangGraph runs the supervisor, the specialist nodes, the checkpointer, and the interrupt before a recall is issued.</p>
+<h2>MCP and A2A</h2>
+<p>MCP exposes <code>trace_lot</code>, <code>check_certificates</code>, and <code>search_documents</code> to any MCP client. A2A here is a small card (<code>a2a-minimal-0.1</code>) plus <code>POST /a2a/tasks</code>. It is labelled as a subset so it is not mistaken for a full agent protocol.</p>
+<h2>Worked example</h2>
+<p>Ferme des Collines commissions <code>BLE-0457</code>. Moulin du Val mills <code>FAR-118</code>. Fournil Lumière bakes <code>BIS-031</code>. Organisme Horizon’s certificate <code>CERT-77</code> covers all three and is valid on 2026-11-13. Épicerie Rive receives the biscuits. A separate mixed flour (<code>FAR-221</code>) and an oil lot with no source (<code>OIL-009</code>) exist so compliance has anomalies that do not touch the biscuit line.</p>
+</body>
+</html>
