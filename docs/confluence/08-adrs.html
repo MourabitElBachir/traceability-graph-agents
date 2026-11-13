@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>ADRs — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Architecture decision records</h1>
+<h1>ADR 0001 — Neo4j for the lineage graph</h1>
+<h2>Status</h2>
+<p>Accepted for this portfolio. The vocabulary stays OWL.</p>
+<h2>Context</h2>
+<p>Recall and trace are path questions. <code>BLE-0457</code> becomes <code>FAR-118</code> and then <code>BIS-031</code>.</p>
+<h2>Decision</h2>
+<p>Project the ERP extract into a property graph. Uniqueness constraints on <code>id</code>. Derived <code>INPUT_OF</code> edges for variable-length walks. OWL file remains the versioned vocabulary, not the instance store.</p>
+<h2>Consequences</h2>
+<p>Cypher is readable for the hero query. Instance data is loaded by Python, so a Neo4j-only rule engine is future work. CI uses the same lineage functions in memory.</p>
+<h1>ADR 0002 — LangGraph for the workflow</h1>
+<h2>Status</h2>
+<p>Accepted.</p>
+<h2>Context</h2>
+<p>A recall must pause for a person. A single prompt cannot hold that pause.</p>
+<h2>Decision</h2>
+<p>LangGraph <code>StateGraph</code> with a supervisor and specialist nodes. <code>MemorySaver</code> checkpoints the thread. <code>interrupt</code> runs after the proposal is written and before “Recall issued”.</p>
+<p>LangChain is limited to prompt templates.</p>
+<h2>Consequences</h2>
+<p>The route in mock mode is keywords, so tests are stable. The checkpointer is in-process only.</p>
+<h1>ADR 0003 — MCP tools and a minimal A2A card</h1>
+<h2>Status</h2>
+<p>Accepted as a teaching surface.</p>
+<h2>Context</h2>
+<p>Other assistants should call trace and certificate checks without scraping the UI. A second agent should be able to discover this one.</p>
+<h2>Decision</h2>
+<p>MCP tools: <code>trace_lot</code>, <code>check_certificates</code>, <code>search_documents</code>. Separately, publish <code>/.well-known/agent-card.json</code> with <code>protocol: a2a-minimal-0.1</code> and accept <code>POST /a2a/tasks</code>. The card says it is not a full A2A stack.</p>
+<h2>Consequences</h2>
+<p>Two protocols, clearly scoped. A complete A2A task model is not implemented.</p>
+<h1>ADR 0004 — Hybrid retrieval</h1>
+<h2>Status</h2>
+<p>Accepted.</p>
+<h2>Context</h2>
+<p>“What is upstream of <code>BIS-031</code>?” is a graph fact. “What did the mill audit say?” is prose.</p>
+<h2>Decision</h2>
+<p>Deterministic walks for lineage and certificates. Vector search for chunks linked to those nodes. Text-to-Cypher is an extra read path with a validator, not the only path.</p>
+<h2>Consequences</h2>
+<p>Answers for the hero chain do not depend on embedding quality. Free-form Cypher is limited to known templates in memory mode and to any guarded read on Neo4j.</p>
+<h1>ADR 0005 — Mock LLM as the default gateway</h1>
+<h2>Status</h2>
+<p>Accepted.</p>
+<h2>Context</h2>
+<p>The repo must run in CI and on a laptop with no API key, and must not invent lot ids.</p>
+<h2>Decision</h2>
+<p><code>LLM_MODE=mock</code> by default. The mock returns a fixed sentence. <code>LLM_MODE=openai</code> posts to an OpenAI-compatible <code>/chat/completions</code>. Narratives that contain unknown ids are dropped. <code>AGRITRACE_AS_OF=2026-11-13</code> freezes certificate expiry.</p>
+<h2>Consequences</h2>
+<p>Eval measures tools, not a hosted model. Switching dimension of embeddings requires a new vector index.</p>
+<h1>ADR 0006 — SQL stays the system of record</h1>
+<h2>Status</h2>
+<p>Accepted.</p>
+<h2>Context</h2>
+<p>Lots and shipments are born in an ERP. A graph is a projection for questions.</p>
+<h2>Decision</h2>
+<p>Model an ERP schema and round-trip every load through SQLite before the graph. Documents live in SQL too, then become chunks.</p>
+<h2>Consequences</h2>
+<p>Postgres is the intended hosted engine; only SQLite is wired. The schema uses portable column types.</p>
+<h1>ADR 0007 — Human approval and read-only Cypher</h1>
+<h2>Status</h2>
+<p>Accepted.</p>
+<h2>Context</h2>
+<p>A recall recommendation can pull biscuits off a shelf. A generated query must not delete the graph.</p>
+<h2>Decision</h2>
+<p>The recall route interrupts until <code>approve</code> or <code>reject</code>. Only the regulator can approve. <code>validate_cypher</code> rejects writes, multiple statements, unknown labels, and large <code>LIMIT</code>s. MCP does not expose free Cypher.</p>
+<h2>Consequences</h2>
+<p>The demo cannot “just answer” a recall in one call. That is intentional.</p>
+</body>
+</html>

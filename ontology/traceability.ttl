@@ -1,0 +1,218 @@
+@prefix agr: <https://example.org/agritrace/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# AgriTrace traceability ontology 0.1.0
+# A small teaching vocabulary inspired by GS1 EPCIS (what, when, where, why).
+# It is not a GS1 publication and allocates no real GS1 keys.
+# Instance data for the running example (BLE-0457, FAR-118, BIS-031, CERT-77)
+# is generated into the graph; this file is the TBox only.
+
+<https://example.org/agritrace/ontology> a owl:Ontology ;
+    rdfs:label "AgriTrace traceability ontology"@en ;
+    rdfs:label "Ontologie de traçabilité AgriTrace"@fr ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:description "Vocabulary, relations, and lightweight rules for fictional agrifood lots, transformations, shipments, certificates, and audits."@en .
+
+agr:epcisAlignment a owl:AnnotationProperty ;
+    rdfs:label "EPCIS alignment"@en .
+
+agr:Actor a owl:Class ;
+    rdfs:label "Actor"@en ;
+    rdfs:comment "An organisation that farms, transforms, ships, sells, certifies, or audits. EPCIS calls the corresponding party a source or destination owning party."@en ;
+    agr:epcisAlignment "Trading party / source or destination owning party" .
+
+agr:Site a owl:Class ;
+    rdfs:label "Site"@en ;
+    rdfs:comment "A physical place: farm, mill, plant, warehouse, or shop. Demo identifiers are not real GLNs."@en ;
+    agr:epcisAlignment "Business location and read point (GLN)" .
+
+agr:Product a owl:Class ;
+    rdfs:label "Product"@en ;
+    rdfs:comment "A trade-item class such as wheat, flour, or biscuits. Demo identifiers are not real GTINs."@en ;
+    agr:epcisAlignment "Trade item / GTIN class, not an instance" .
+
+agr:Ingredient a owl:Class ;
+    rdfs:label "Ingredient"@en ;
+    rdfs:comment "A material declared in a recipe. A declared ingredient with no source lot is a broken-chain signal."@en ;
+    agr:epcisAlignment "Input quantity in an EPCIS TransformationEvent" .
+
+agr:Lot a owl:Class ;
+    rdfs:label "Lot"@en ;
+    rdfs:comment "A batch instance. The running example is wheat BLE-0457, flour FAR-118, biscuits BIS-031."@en ;
+    agr:epcisAlignment "Object identifier plus ILMD lot/batch and quantity" .
+
+agr:ProcessStep a owl:Class ;
+    rdfs:label "Process step"@en ;
+    rdfs:comment "An event: commissioning at a farm, or a transformation that consumes lots and produces lots."@en ;
+    agr:epcisAlignment "ObjectEvent (commissioning) or TransformationEvent" .
+
+agr:Shipment a owl:Class ;
+    rdfs:label "Shipment"@en ;
+    rdfs:comment "Movement of one or more lots between sites."@en ;
+    agr:epcisAlignment "Shipping event; bizStep shipping; SSCC on the logistic unit" .
+
+agr:Certificate a owl:Class ;
+    rdfs:label "Certificate"@en ;
+    rdfs:comment "A fictional scheme credential with validity dates. CERT-77 is the Organic Horizon certificate of the running example."@en ;
+    agr:epcisAlignment "Not core EPCIS. Modelled as certification ILMD plus an explicit node so validity can be queried." .
+
+agr:Audit a owl:Class ;
+    rdfs:label "Audit"@en ;
+    rdfs:comment "An inspection of a site that can support or challenge a certificate."@en ;
+    agr:epcisAlignment "Not core EPCIS. Evidence linked to a site and a certificate." .
+
+agr:Document a owl:Class ;
+    rdfs:label "Document"@en ;
+    rdfs:comment "Unstructured certificate, audit, or procedure text."@en .
+
+agr:Chunk a owl:Class ;
+    rdfs:label "Chunk"@en ;
+    rdfs:comment "A passage of a document, embedded for vector search and linked back to graph entities."@en .
+
+agr:operates a owl:ObjectProperty ;
+    rdfs:label "operates"@en ;
+    rdfs:domain agr:Actor ;
+    rdfs:range agr:Site .
+
+agr:producedAt a owl:ObjectProperty ;
+    rdfs:label "produced at"@en ;
+    rdfs:domain agr:Lot ;
+    rdfs:range agr:Site ;
+    agr:epcisAlignment "bizLocation of the commissioning or transformation event" .
+
+agr:ofProduct a owl:ObjectProperty ;
+    rdfs:label "of product"@en ;
+    rdfs:domain agr:Lot ;
+    rdfs:range agr:Product .
+
+agr:consumes a owl:ObjectProperty ;
+    rdfs:label "consumes"@en ;
+    rdfs:domain agr:ProcessStep ;
+    rdfs:range agr:Lot ;
+    agr:epcisAlignment "TransformationEvent inputQuantityList" .
+
+agr:produces a owl:ObjectProperty ;
+    rdfs:label "produces"@en ;
+    rdfs:domain agr:ProcessStep ;
+    rdfs:range agr:Lot ;
+    agr:epcisAlignment "TransformationEvent outputQuantityList" .
+
+agr:performedAt a owl:ObjectProperty ;
+    rdfs:label "performed at"@en ;
+    rdfs:domain agr:ProcessStep ;
+    rdfs:range agr:Site .
+
+agr:inputOf a owl:ObjectProperty ;
+    rdfs:label "input of"@en ;
+    rdfs:domain agr:Lot ;
+    rdfs:range agr:Lot ;
+    rdfs:comment "Derived lot-to-lot lineage. The event of record remains the ProcessStep."@en .
+
+agr:contains a owl:ObjectProperty ;
+    rdfs:label "contains"@en ;
+    rdfs:domain agr:Shipment ;
+    rdfs:range agr:Lot .
+
+agr:shippedFrom a owl:ObjectProperty ;
+    rdfs:label "shipped from"@en ;
+    rdfs:domain agr:Shipment ;
+    rdfs:range agr:Site .
+
+agr:shippedTo a owl:ObjectProperty ;
+    rdfs:label "shipped to"@en ;
+    rdfs:domain agr:Shipment ;
+    rdfs:range agr:Site .
+
+agr:covers a owl:ObjectProperty ;
+    rdfs:label "covers"@en ;
+    rdfs:domain agr:Certificate ;
+    rdfs:comment "A certificate may cover a lot, a site, or an actor. CERT-77 covers BLE-0457, FAR-118, and BIS-031."@en .
+
+agr:issuedBy a owl:ObjectProperty ;
+    rdfs:label "issued by"@en ;
+    rdfs:domain agr:Certificate ;
+    rdfs:range agr:Actor .
+
+agr:heldBy a owl:ObjectProperty ;
+    rdfs:label "held by"@en ;
+    rdfs:domain agr:Certificate ;
+    rdfs:range agr:Actor .
+
+agr:audits a owl:ObjectProperty ;
+    rdfs:label "audits"@en ;
+    rdfs:domain agr:Audit ;
+    rdfs:range agr:Site .
+
+agr:evidences a owl:ObjectProperty ;
+    rdfs:label "evidences"@en ;
+    rdfs:domain agr:Audit ;
+    rdfs:range agr:Certificate .
+
+agr:about a owl:ObjectProperty ;
+    rdfs:label "about"@en ;
+    rdfs:domain agr:Document ;
+    rdfs:comment "Links a document to the lots, sites, or certificates it discusses."@en .
+
+agr:partOf a owl:ObjectProperty ;
+    rdfs:label "part of"@en ;
+    rdfs:domain agr:Chunk ;
+    rdfs:range agr:Document .
+
+agr:mentions a owl:ObjectProperty ;
+    rdfs:label "mentions"@en ;
+    rdfs:domain agr:Chunk .
+
+agr:ingredientOf a owl:ObjectProperty ;
+    rdfs:label "ingredient of"@en ;
+    rdfs:domain agr:Ingredient ;
+    rdfs:range agr:Product .
+
+agr:usedIn a owl:ObjectProperty ;
+    rdfs:label "used in"@en ;
+    rdfs:domain agr:Ingredient ;
+    rdfs:range agr:ProcessStep .
+
+agr:id a owl:DatatypeProperty ;
+    rdfs:label "id"@en ;
+    rdfs:range xsd:string .
+
+agr:eventTime a owl:DatatypeProperty ;
+    rdfs:label "event time"@en ;
+    rdfs:domain agr:ProcessStep ;
+    rdfs:range xsd:dateTime ;
+    agr:epcisAlignment "eventTime" .
+
+agr:bizStep a owl:DatatypeProperty ;
+    rdfs:label "business step"@en ;
+    rdfs:domain agr:ProcessStep ;
+    rdfs:range xsd:string ;
+    agr:epcisAlignment "bizStep: commissioning or transforming" .
+
+agr:validFrom a owl:DatatypeProperty ;
+    rdfs:label "valid from"@en ;
+    rdfs:domain agr:Certificate ;
+    rdfs:range xsd:date .
+
+agr:validTo a owl:DatatypeProperty ;
+    rdfs:label "valid to"@en ;
+    rdfs:domain agr:Certificate ;
+    rdfs:range xsd:date .
+
+agr:quantity a owl:DatatypeProperty ;
+    rdfs:label "quantity"@en ;
+    rdfs:domain agr:Lot ;
+    rdfs:range xsd:decimal ;
+    agr:epcisAlignment "quantity list" .
+
+agr:CommissioningStep a owl:Class ;
+    rdfs:subClassOf agr:ProcessStep ;
+    rdfs:label "Commissioning step"@en ;
+    rdfs:comment "Primary production. Inputs may be empty. A transformation with empty inputs is not commissioning and is a broken chain."@en .
+
+agr:TransformationStep a owl:Class ;
+    rdfs:subClassOf agr:ProcessStep ;
+    rdfs:label "Transformation step"@en ;
+    rdfs:comment "Must consume at least one source lot. Two inputs with different certificate states are a mixed lot."@en .

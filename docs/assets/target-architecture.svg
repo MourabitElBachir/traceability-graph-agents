@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" role="img">
+
+    <rect width="1400" height="720" fill="#F7F3E8"/>
+    <text x="40" y="46" fill="#14352A" font-family="Georgia, serif" font-size="28">Target platform, not what this repo deploys</text>
+    <rect x="40" y="80" width="640" height="600" rx="16" fill="#FFFCF7" stroke="#1F4D3A"/>
+    <rect x="720" y="80" width="640" height="600" rx="16" fill="#FFFCF7" stroke="#1F4D3A"/>
+    <text x="64" y="120" fill="#1F4D3A" font-family="Georgia, serif" font-size="22">Business view</text>
+    <text x="744" y="120" fill="#1F4D3A" font-family="Georgia, serif" font-size="22">Technical view</text>
+    <text x="64" y="180" fill="#1C1408" font-family="Georgia, serif" font-size="20">Producers</text><text x="64" y="250" fill="#1C1408" font-family="Georgia, serif" font-size="20">Processors</text><text x="64" y="320" fill="#1C1408" font-family="Georgia, serif" font-size="20">Certification bodies</text><text x="64" y="390" fill="#1C1408" font-family="Georgia, serif" font-size="20">Auditors</text><text x="64" y="460" fill="#1C1408" font-family="Georgia, serif" font-size="20">Retailers</text><text x="64" y="530" fill="#1C1408" font-family="Georgia, serif" font-size="20">Use cases: trace, recall, certify, audit</text><text x="744" y="180" fill="#1C1408" font-family="Georgia, serif" font-size="20">Event stream</text><text x="744" y="250" fill="#1C1408" font-family="Georgia, serif" font-size="20">SQL + graph + vectors</text><text x="744" y="320" fill="#1C1408" font-family="Georgia, serif" font-size="20">GraphRAG and LangGraph</text><text x="744" y="390" fill="#1C1408" font-family="Georgia, serif" font-size="20">MCP / A2A</text><text x="744" y="460" fill="#1C1408" font-family="Georgia, serif" font-size="20">API gateway and Kubernetes</text><text x="744" y="530" fill="#1C1408" font-family="Georgia, serif" font-size="20">CI/CD, observability, governance</text>
+</svg>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Architecture — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Architecture</h1>
+<p>Canonical copy: <a href="../README.md#4-architecture">README §4</a>.</p>
+<h2>Context</h2>
+<p>A quality lead or an auditor asks AgriTrace where a lot went and whether <code>CERT-77</code> still covers it. The language model is optional. Mock mode is the default.</p>
+<h2>Containers in this repository</h2>
+<pre><code>%%{init: {&#x27;theme&#x27;: &#x27;base&#x27;, &#x27;themeVariables&#x27;: {&#x27;primaryColor&#x27;: &#x27;#1F4D3A&#x27;, &#x27;primaryTextColor&#x27;: &#x27;#F7F3E8&#x27;, &#x27;primaryBorderColor&#x27;: &#x27;#14352A&#x27;, &#x27;lineColor&#x27;: &#x27;#C4A35A&#x27;, &#x27;secondaryColor&#x27;: &#x27;#F4E8C1&#x27;, &#x27;tertiaryColor&#x27;: &#x27;#E7F0EA&#x27;, &#x27;fontFamily&#x27;: &#x27;Georgia, serif&#x27;}}}%%
+flowchart LR
+  erp[&quot;SQLite ERP&quot;] --&gt; ingest[&quot;Ingestion&quot;] --&gt; graph[&quot;Neo4j or memory graph&quot;]
+  ingest --&gt; vec[&quot;Chunk vectors&quot;]
+  graph --&gt; rag[&quot;GraphRAG&quot;]
+  vec --&gt; rag --&gt; agents[&quot;LangGraph&quot;]
+  agents --&gt; api[&quot;FastAPI&quot;]
+  agents --&gt; mcp[&quot;MCP&quot;]
+  agents --&gt; a2a[&quot;A2A minimal&quot;]
+  agents --&gt; human[&quot;Human approval&quot;]
+  classDef box fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  class erp,ingest,graph,vec,rag,agents,api,mcp,a2a,human box;</code></pre>
+<p><img alt="Repository containers" src="../assets/architecture.svg"/></p>
+<p>SQL is the ledger. Ingestion checks referential integrity, writes SQLite, reads it back, and projects nodes. <code>GRAPH_BACKEND=memory</code> answers in-process (CI). <code>GRAPH_BACKEND=neo4j</code> also MERGEs into Neo4j 5.26 with uniqueness constraints and a vector index.</p>
+<h2>Components</h2>
+<table><thead><tr><th>Component</th><th>File</th></tr></thead><tbody>
+<tr><td>Dataset and anomalies</td><td><code>src/agritrace/data/generator.py</code></td></tr>
+<tr><td>SQL</td><td><code>src/agritrace/data/erp.py</code></td></tr>
+<tr><td>Lineage and certificates</td><td><code>src/agritrace/graph/lineage.py</code></td></tr>
+<tr><td>Cypher guard, RBAC, audit log</td><td><code>src/agritrace/security/</code></td></tr>
+<tr><td>Supervisor graph</td><td><code>src/agritrace/agents/graph.py</code></td></tr>
+<tr><td>HTTP and A2A</td><td><code>src/agritrace/api/main.py</code></td></tr>
+<tr><td>MCP</td><td><code>src/agritrace/mcp/server.py</code></td></tr>
+</tbody></table>
+<h2>Sequence for a recall of BLE-0457</h2>
+<pre><code>%%{init: {&#x27;theme&#x27;: &#x27;base&#x27;, &#x27;themeVariables&#x27;: {&#x27;fontFamily&#x27;: &#x27;Georgia, serif&#x27;}}}%%
+sequenceDiagram
+  actor User
+  participant Supervisor
+  participant Human
+  User-&gt;&gt;Supervisor: Recall impact of BLE-0457
+  Supervisor--&gt;&gt;User: FAR-118, BIS-031, CERT-77 still valid, needs approval
+  User-&gt;&gt;Human: approve
+  Human--&gt;&gt;User: Recall issued for BLE-0457</code></pre>
+<p><img alt="Sequence" src="../assets/sequence-recall.svg"/></p>
+<h2>Deployment</h2>
+<p><code>compose.yaml</code> starts Neo4j and the API. Ports publish on <code>127.0.0.1</code>. The container listens on <code>0.0.0.0:$PORT</code>. CI does not use Compose.</p>
+<h2>Cross-cutting</h2>
+<p>Observability, the eval set, the LLM gateway, and security controls are sections 9–13 of the README. The richer company platform is <a href="target-architecture.md">target-architecture.md</a>.</p>
+</body>
+</html>

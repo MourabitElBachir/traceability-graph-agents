@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Security and governance — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Security and governance</h1>
+<p>Canonical copy: <a href="../README.md#9-security-and-governance">README §9</a>.</p>
+<h2>Data governance</h2>
+<ul><li><strong>Lineage.</strong> Nodes are loaded from the SQLite extract and tagged <code>source_system=erp-sqlite</code>.</li><li><strong>Catalog.</strong> The ontology file is the catalog. <code>GET /ontology</code> returns classes and version.</li><li><strong>Versioning.</strong> <code>owl:versionInfo &quot;0.1.0&quot;</code> is copied to <code>ontology_version</code> on ingest.</li><li><strong>Quality.</strong> <code>check_quality</code> fails the load on dangling ids, inverted certificate dates, and empty documents. Expired <code>CERT-78</code> and the empty-input press step are findings, not load errors: they are the scenario.</li></ul>
+<h2>Access</h2>
+<p><code>security/rbac.py</code> computes visible lots:</p>
+<ul><li>retailer: lots shipped to their site, plus upstream (Épicerie Rive sees <code>BIS-031</code>, <code>FAR-118</code>, <code>BLE-0457</code>, not <code>OIL-009</code>);</li><li>producer: lots they commissioned, plus downstream (Ferme des Collines sees the biscuit line, not <code>FAR-221</code>);</li><li>processor and distributor: lots they touch, plus upstream and downstream;</li><li>certifier: lots on certificates they issued, plus downstream;</li><li>auditor: lots at sites they audited;</li><li>regulator: all.</li></ul>
+<p><code>read_cypher</code> is limited to auditor and regulator. Approving a recall is limited to the regulator. Missing <code>X-Actor-Id</code> is the regulator only while <code>AGRITRACE_DEMO_OPEN=1</code>.</p>
+<h2>Secrets, personal data, model guardrails</h2>
+<p>No API key is required. <code>.env</code> is ignored. The Compose password fallback is local only.</p>
+<p>The seed has no real persons. Questions are written to the demo audit log; production should redact them and set a retention period. Mock mode does not send text to a provider.</p>
+<p>Injection patterns are flagged and the narrative model is skipped. Cypher must be a read. Answers cite tool ids. A narrative that invents an id is discarded.</p>
+<h2>Human oversight, gateway, monitoring, EU AI Act notes</h2>
+<p>A recall stays <code>needs_approval</code> until a person resumes the thread. The LLM gateway is <code>LLM_MODE</code> plus an OpenAI-compatible base URL, temperature 0, behind those guards.</p>
+<p>OpenTelemetry spans cover ingest, trace, search, and ask. Export is off by default.</p>
+<p>A recall that can remove food from sale is an action that needs a human. This repository is a demo, not a conformity assessment. The notes are engineering controls, not legal advice.</p>
+<p>The decision log is <code>GET /audit</code> and optional <code>AUDIT_LOG_PATH</code>. It is process-local unless the path is set.</p>
+</body>
+</html>

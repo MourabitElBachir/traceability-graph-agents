@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Target architecture — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Target architecture</h1>
+<p>Canonical copy: <a href="../README.md#44-target-architecture-for-a-certification-company">README §4.4</a>.</p>
+<p>This page describes a platform for an agrifood certification organisation. <strong>It is not what <code>compose.yaml</code> deploys.</strong> The repository is the reference slice: one SQL extract, one graph, one API process, a mock model, and a human interrupt.</p>
+<p><img alt="Business view beside technical view" src="../assets/target-architecture.svg"/></p>
+<h2>Business view</h2>
+<table><thead><tr><th>Actor</th><th>Needs</th></tr></thead><tbody>
+<tr><td>Producers</td><td>Prove the harvest lot and see where it went if there is a recall</td></tr>
+<tr><td>Processors</td><td>Record transformations, including splits and mixes</td></tr>
+<tr><td>Certification bodies</td><td>Issue and expire credentials such as <code>CERT-77</code></td></tr>
+<tr><td>Auditors</td><td>Attach findings to a site and to lots</td></tr>
+<tr><td>Retailers</td><td>See the upstream of lots they received, not other shops’ lots</td></tr>
+</tbody></table>
+<p>Use cases: <strong>trace</strong>, <strong>recall</strong>, <strong>certify</strong>, <strong>audit</strong>.</p>
+<h2>Technical view</h2>
+<pre><code>%%{init: {&#x27;theme&#x27;: &#x27;base&#x27;, &#x27;themeVariables&#x27;: {&#x27;primaryColor&#x27;: &#x27;#1F4D3A&#x27;, &#x27;primaryTextColor&#x27;: &#x27;#F7F3E8&#x27;, &#x27;primaryBorderColor&#x27;: &#x27;#14352A&#x27;, &#x27;lineColor&#x27;: &#x27;#C4A35A&#x27;, &#x27;secondaryColor&#x27;: &#x27;#F4E8C1&#x27;, &#x27;tertiaryColor&#x27;: &#x27;#E7F0EA&#x27;, &#x27;fontFamily&#x27;: &#x27;Georgia, serif&#x27;}}}%%
+flowchart LR
+  bus[&quot;Event stream&quot;] --&gt; erp[&quot;ERP SQL&quot;] --&gt; graph[&quot;Graph + vectors&quot;]
+  graph --&gt; rag[&quot;GraphRAG&quot;] --&gt; lg[&quot;LangGraph&quot;]
+  lg --&gt; edge[&quot;MCP / A2A&quot;] --&gt; gw[&quot;API gateway&quot;] --&gt; k8s[&quot;Kubernetes&quot;]
+  classDef t fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  class bus,erp,graph,rag,lg,edge,gw,k8s t;</code></pre>
+<table><thead><tr><th>Layer</th><th>Target</th><th>In this repo</th></tr></thead><tbody>
+<tr><td>Ingestion</td><td>Stream of EPCIS-like events</td><td>Batch SQL extract</td></tr>
+<tr><td>Stores</td><td>Postgres, Neo4j, vector index</td><td>SQLite, Neo4j optional, hash embeddings</td></tr>
+<tr><td>Reasoning</td><td>LangChain prompts, LangGraph workflows</td><td>Implemented</td></tr>
+<tr><td>Edges</td><td>MCP tools, A2A tasks</td><td>MCP plus a minimal card</td></tr>
+<tr><td>Edge</td><td>API gateway, Kubernetes, CI/CD</td><td>FastAPI, Compose, GitHub Actions</td></tr>
+<tr><td>Cross-cutting</td><td>Identity, row security, audit vault, OTel, LLM policy</td><td>Sketched and partly implemented (section 9 of the README)</td></tr>
+</tbody></table>
+<p>Identity, a durable audit log, and a full A2A lifecycle are on the roadmap, not done.</p>
+</body>
+</html>

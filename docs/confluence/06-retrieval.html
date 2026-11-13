@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Retrieval — AgriTrace</title>
+  <style>
+    body { font-family: Georgia, serif; color: #1C1408; background: #F7F3E8; margin: 2rem auto; max-width: 920px; line-height: 1.5; }
+    h1, h2, h3 { color: #14352A; }
+    code, pre { font-family: ui-monospace, monospace; background: #E7F0EA; }
+    pre { padding: 1rem; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #1F4D3A; padding: 0.4rem 0.6rem; text-align: left; }
+    th { background: #1F4D3A; color: #F7F3E8; }
+    img { max-width: 100%; }
+    a { color: #1F4D3A; }
+  </style>
+</head>
+<body>
+<p><em>AgriTrace. Fictional data. Canonical write-up: the repository README. Images: docs/assets, referenced relatively from this file.</em></p>
+<h1>Retrieval</h1>
+<p>Canonical copy: <a href="../README.md#7-retrieval">README §7</a>.</p>
+<h2>Hybrid GraphRAG</h2>
+<p>1. Exact walk for lots and certificates (<code>lineage.py</code>).</p>
+<p>2. Vector plus lexical score over document chunks. In mock mode the embedding is a 64-d hash, mixed with token overlap so “mill audit” and “mixed” hit <code>DOC-AUDIT-MILL</code>.</p>
+<p>3. Chunks carry entity ids. A caller only sees a chunk when every lot id on it is in their visible set (regulators and auditors see all).</p>
+<p>Neo4j path: index <code>chunk_embedding</code>, cosine. Agents still use the shared Python walk so answers match CI.</p>
+<h2>Text-to-Cypher guardrails</h2>
+<p><code>draft_cypher</code> builds a prompt with <code>schema_card()</code> (LangChain <code>ChatPromptTemplate</code>). Mock mode does not call a model; it emits a template. <code>validate_cypher</code> then:</p>
+<ul><li>rejects empty text, comments, and <code>;</code></li><li>rejects <code>CREATE</code>, <code>MERGE</code>, <code>DELETE</code>, <code>SET</code>, <code>DROP</code>, <code>CALL</code>, and the other write keywords</li><li>requires a single <code>MATCH</code> … <code>RETURN</code></li><li>checks labels and relationship types against <code>graph/schema.py</code></li><li>caps <code>LIMIT</code> at 50</li></ul>
+<p>Rows that mention a lot the caller cannot see are dropped.</p>
+<p>The hero query that returns <code>BLE-0457</code>, <code>FAR-118</code>, <code>BIS-031</code>, <code>CERT-77</code> is accepted and executed in memory mode.</p>
+</body>
+</html>
