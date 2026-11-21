@@ -6,10 +6,12 @@ import os
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from agritrace.a2a.card import agent_card
 from agritrace.ontology.loader import summarise
+from agritrace.optimization.present import impact_view, present_case
 from agritrace.security.rbac import AccessDenied
 from agritrace.service import TraceService, build_service
 
@@ -17,6 +19,12 @@ app = FastAPI(
     title="AgriTrace",
     version="0.1.0",
     summary="Fictional agrifood traceability graph, GraphRAG, and multi-agent recall assistant.",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",") if origin.strip()],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -38,6 +46,20 @@ class CypherBody(BaseModel):
     actor_id: str | None = None
 
 
+class PlanBody(BaseModel):
+    lot_id: str = "BLE-0457"
+    lab_tests_per_day: int = 2
+    biscuits_delivered: bool = True
+    risk_threshold: float = 0.6
+
+
+class ApproveBody(BaseModel):
+    lot_id: str
+    decision: str = Field(pattern="^(approve|modify)$")
+    comment: str = Field(min_length=3)
+    reason: str = "contamination"
+
+
 def _service() -> TraceService:
     if not hasattr(app.state, "service"):
         app.state.service = build_service()
@@ -52,6 +74,45 @@ def _principal(service: TraceService, actor_id: str | None) -> Any:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
     except StopIteration as exc:
         raise HTTPException(status_code=404, detail="unknown actor") from exc
+
+
+@app.get("/ui/impact/{lot_id}")
+def ui_impact(lot_id: str) -> dict[str, Any]:
+    service = _service()
+    try:
+        return impact_view(service.store, lot_id, service.settings.as_of)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"unknown lot {lot_id}") from exc
+
+
+@app.post("/ui/plan")
+def ui_plan(body: PlanBody) -> dict[str, Any]:
+    service = _service()
+    changes: dict[str, Any] = {
+        "lab_tests_per_day": body.lab_tests_per_day,
+        "risk_threshold": body.risk_threshold,
+        "delivered": {"BIS-031": body.biscuits_delivered},
+    }
+    try:
+        return present_case(service.store, body.lot_id, service.settings.as_of, changes)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"unknown lot {body.lot_id}") from exc
+
+
+@app.post("/ui/approve")
+def ui_approve(body: ApproveBody) -> dict[str, Any]:
+    service = _service()
+    event = service.audit.record(
+        action="ui_approve",
+        allowed=True,
+        principal_role="regulator",
+        principal_actor_id=None,
+        lot_id=body.lot_id,
+        detail=body.decision,
+        comment=body.comment,
+        reason=body.reason,
+    )
+    return {"id": event["id"], "at": event["ts"], "lotId": body.lot_id, "decision": body.decision}
 
 
 @app.get("/health")

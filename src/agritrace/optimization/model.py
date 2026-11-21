@@ -291,3 +291,13 @@ def problem_from_store(store: Any, root_lot_id: str, as_of: date, parameters: Pa
 
 def replace_parameters(parameters: Parameters, **changes: Any) -> Parameters:
     return replace(parameters, **changes)
+
+
+def recall_everything_eur(problem: Problem) -> float:
+    """Cost of recalling every impacted lot, using the same cost formulas as the plan."""
+
+    total = 0
+    for lot in problem.lots:
+        recall = next(option for option in action_options(lot, problem.parameters) if option.action == "recall")
+        total += recall.cost_cents
+    return round(total / 100, 2)

@@ -12,3 +12,5 @@ var/
 dist/
 *.egg-info/
 .python-version
+web/node_modules/
+web/.next/
