@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from scripts.export_web_scenarios import catalog
+from agritrace.optimization.web_catalog import catalog
 
 
 def test_export_matches_the_worked_example() -> None:
