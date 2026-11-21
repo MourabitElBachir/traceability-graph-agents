@@ -69,6 +69,10 @@ OPTIONS {indexConfig: { `vector.dimensions`: 64, `vector.similarity_function`: &
 <p><code>ChatPromptTemplate</code> in <code>llm/provider.py</code> and <code>retrieval/text_to_cypher.py</code>. The prompt carries the schema card and forbids writes. The HTTP client, not a vendor chain, posts the messages when <code>LLM_MODE=openai</code>.</p>
 <h2>LangGraph</h2>
 <p><code>src/agritrace/agents/graph.py</code>. <code>StateGraph</code>, <code>MemorySaver</code>, <code>interrupt</code>, <code>Command</code>. The recall node stores the proposal; the next node interrupts.</p>
+<h2>OR-Tools CP-SAT and HiGHS</h2>
+<p>Free solvers for the containment plan. CP-SAT is the main engine. HiGHS, through <code>highspy</code>, solves the same mixed-integer model. Files: <code>src/agritrace/optimization/</code>. No paid solver.</p>
+<p>The impacted lots from the graph are the variables. Certificate rules, risk threshold, delivered shipments, site quarantine capacity, lab tests per day, and the regulatory deadline are the constraints. On <code>BLE-0457</code> the baseline is block (4850 EUR), quarantine <code>FAR-118</code> (2903 EUR), recall <code>BIS-031</code> (19930 EUR), total 27683 EUR.</p>
+<p>Alternative: a paid MIP solver. Rejected. The formulation is the part that should be reviewed; the solver is replaceable.</p>
 <h2>MCP</h2>
 <p><code>src/agritrace/mcp/server.py</code>. SDK 2.x <code>MCPServer</code>. Tools: <code>trace_lot</code>, <code>check_certificates</code>, <code>search_documents</code>.</p>
 <pre><code>TOOLS = {

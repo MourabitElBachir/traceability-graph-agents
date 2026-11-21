@@ -78,6 +78,14 @@ CREATE TABLE lots (
 
 `src/agritrace/agents/graph.py`. `StateGraph`, `MemorySaver`, `interrupt`, `Command`. The recall node stores the proposal; the next node interrupts.
 
+## OR-Tools CP-SAT and HiGHS
+
+Free solvers for the containment plan. CP-SAT is the main engine. HiGHS, through `highspy`, solves the same mixed-integer model. Files: `src/agritrace/optimization/`. No paid solver.
+
+The impacted lots from the graph are the variables. Certificate rules, risk threshold, delivered shipments, site quarantine capacity, lab tests per day, and the regulatory deadline are the constraints. On `BLE-0457` the baseline is block (4850 EUR), quarantine `FAR-118` (2903 EUR), recall `BIS-031` (19930 EUR), total 27683 EUR.
+
+Alternative: a paid MIP solver. Rejected. The formulation is the part that should be reviewed; the solver is replaceable.
+
 ## MCP
 
 `src/agritrace/mcp/server.py`. SDK 2.x `MCPServer`. Tools: `trace_lot`, `check_certificates`, `search_documents`.

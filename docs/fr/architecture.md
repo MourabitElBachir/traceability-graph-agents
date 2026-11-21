@@ -11,7 +11,16 @@ flowchart LR
   class erp,ingest,graphe,agents,api,humain b;
 ```
 
-Pour `BLE-0457`, l’agent de traçabilité trouve `FAR-118` et `BIS-031`. La note indique que `CERT-77` est encore valide. Le statut reste `needs_approval` tant que personne n’a répondu `approve` ou `reject`.
+```mermaid
+flowchart LR
+  erpNode["ERP SQL"] --> ontologyNode["Ontologie et Neo4j"]
+  ontologyNode --> agentNode["Agents LangGraph"]
+  agentNode --> solverNode["CP-SAT ou HiGHS"]
+  solverNode --> planNode["Plan optimal"]
+  planNode --> humanNode["Validation humaine"]
+```
+
+Pour `BLE-0457`, l’agent de traçabilité trouve `FAR-118` et `BIS-031`, puis le solveur propose un plan. Une personne valide avant l’émission. La note indique que `CERT-77` est encore valide. Le statut reste `needs_approval` tant que personne n’a répondu `approve` ou `reject`.
 
 L’architecture cible d’une société de certification (flux d’événements, Kubernetes, passerelle) est décrite à part : ce n’est pas le déploiement de `compose.yaml`. Voir [architecture-cible.md](architecture-cible.md).
 

@@ -137,9 +137,22 @@ LangChain does not decide the route. The mock router is deterministic keywords s
 </details>
 
 <details>
+<summary>Descriptive graph vs prescriptive solver</summary>
+
+The ontology and the graph are **descriptive**. They say what happened and what is impacted: wheat `BLE-0457` was milled into `FAR-118` and baked into `BIS-031`, and `CERT-77` still covers that chain.
+
+A solver is **prescriptive**. It chooses an action for each impacted lot. Entities become variables (block, quarantine-and-test, redirect, or recall). Rules become constraints: risk above 0.60 must be blocked or recalled, a delivered shipment can only be recalled, a redirect channel must accept the certificate schemes, and quarantine cannot exceed site or lab capacity.
+
+Formulating those rules matters more than which solver you call. This repo solves the same model twice with free software: Google OR-Tools CP-SAT, and HiGHS (via `highspy`) as a MIP. No paid solver and no paid API.
+
+On the fixture, the optimal baseline for `BLE-0457` costs **27683 EUR**: block the wheat (4850), quarantine the flour (2903), recall the delivered biscuits (19930). A person still has to approve before that recall is issued.
+
+</details>
+
+<details>
 <summary>MCP and A2A</summary>
 
-**MCP** (Model Context Protocol) exposes tools a separate assistant can call: `trace_lot`, `check_certificates`, `search_documents`. The server is [`src/agritrace/mcp/server.py`](src/agritrace/mcp/server.py) (`python -m agritrace.mcp.server` on stdio).
+**MCP** (Model Context Protocol) exposes tools a separate assistant can call: `trace_lot`, `check_certificates`, `search_documents`, and `optimize_recall_plan`. The server is [`src/agritrace/mcp/server.py`](src/agritrace/mcp/server.py) (`python -m agritrace.mcp.server` on stdio).
 
 **A2A** (agent-to-agent) is a different idea: one agent discovers another via a card and sends it a task. This repo serves a **minimal, clearly labelled** card at `GET /.well-known/agent-card.json` and accepts `POST /a2a/tasks`. It is a teaching subset (`protocol: a2a-minimal-0.1`), not a full A2A stack.
 
@@ -687,6 +700,23 @@ flowchart TB
 
 Cross-cutting on the target platform: an API gateway with real identity, row-level security enforced in the graph query, an append-only audit log, OpenTelemetry to a collector, policy checks on the LLM gateway, and CI/CD that promotes ontology versions. Section 10 is the control list. Section 17 says which of those controls are only sketched here.
 
+### 5.5 Decision layer
+
+The graph answers “what is impacted?”. The optimizer answers “what should we do?”. `python -m agritrace.optimization.demo` prints the plan for `BLE-0457`.
+
+![ERP to ontology and Neo4j, then agents, then CP-SAT or HiGHS, then a plan a person must approve](docs/assets/decision-layer.svg)
+
+```mermaid
+flowchart LR
+  erpNode["SQLite ERP"] --> ontologyNode["Ontology and Neo4j"]
+  ontologyNode --> agentNode["LangGraph agents"]
+  agentNode --> solverNode["CP-SAT or HiGHS"]
+  solverNode --> planNode["Optimal plan"]
+  planNode --> humanNode["Human validation"]
+  classDef box fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
+  class erpNode,ontologyNode,agentNode,solverNode,planNode,humanNode box;
+```
+
 ---
 
 ## 6. Ontology and graph schema
@@ -747,15 +777,16 @@ flowchart TD
   compliance["Compliance agent"]
   documents["Document agent"]
   recall["Recall assess"]
+  optimize["CP-SAT or HiGHS"]
   approval["Human interrupt"]
   compose["Compose grounded answer"]
   route --> trace --> compose
   route --> compliance --> compose
   route --> documents --> compose
-  route --> recall --> approval --> compose
+  route --> recall --> optimize --> approval --> compose
   classDef agentNode fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
   classDef humanStop fill:#8C4A3A,stroke:#5C3026,color:#F7F3E8;
-  class route,trace,compliance,documents,recall,compose agentNode;
+  class route,trace,compliance,documents,recall,optimize,compose agentNode;
   class approval humanStop;
 ```
 
@@ -766,6 +797,7 @@ flowchart TD
 | Compliance | Walk upstream of a lot and apply the certificate rules. With no lot, list expired certificates. With only `CERT-77`, return its scope. |
 | Documents | Hybrid search over certificate and audit text, then one graph hop from a mentioned lot. |
 | Recall | Downstream closure plus the certificate note. Writes the proposal. Does not issue it. |
+| Optimize | Builds a CP-SAT plan (HiGHS can solve the same MIP) for block, quarantine, redirect, or recall. |
 | Approval | `interrupt(...)`. The checkpointer holds the thread. Resume with `approve` or `reject`. Only the **regulator** role can approve. |
 | Compose | Turns tool payloads into the answer and citations. The mock narrative cannot add new ids. |
 
@@ -773,7 +805,7 @@ Typed state is `GraphState` in [`src/agritrace/agents/graph.py`](src/agritrace/a
 
 The checkpointer is LangGraph’s in-memory saver (`MemorySaver`). It is process-local. A restart forgets threads. That is acceptable for the demo and called out on the roadmap.
 
-The interrupt is inside the approval node, **after** the proposal is stored and **before** compose writes “Recall issued”.
+The interrupt is inside the approval node, **after** the trace and the solver plan are stored and **before** compose writes “Recall issued”.
 
 ---
 
@@ -805,7 +837,8 @@ Guardrail limits, stated plainly:
 | Python 3.11, Pydantic | Language and records | Typed lots, certificates, API bodies | `models.py` |
 | LangChain | Prompt templates | Schema-grounded Cypher prompt, narrative prompt | `llm/provider.py` |
 | LangGraph | Stateful workflow | Supervisor, interrupt, checkpointer | `agents/graph.py` |
-| MCP SDK | Tool protocol | `trace_lot`, `check_certificates`, `search_documents` | `mcp/server.py` |
+| MCP SDK | Tool protocol | `trace_lot`, `check_certificates`, `search_documents`, `optimize_recall_plan` | `mcp/server.py` |
+| OR-Tools CP-SAT and HiGHS | Free solvers | Recall containment plan from graph impact | `optimization/` |
 | A2A (minimal) | Agent card + task POST | A labelled example, not a full stack | `a2a/card.py` |
 | FastAPI | HTTP API | Ask, resume, trace, Cypher, health | `api/main.py` |
 | Streamlit | Small UI | Ask as a chosen actor, approve a recall | `ui/streamlit_app.py` |
@@ -1160,6 +1193,8 @@ Certificate note: CERT-77 is still valid until 2027-12-31.
 A human must approve before this recommendation is issued.
 ```
 
+The solver then recommends, and still does **not** issue, this plan (27683 EUR): block `BLE-0457` (4850), quarantine `FAR-118` (2903), recall delivered `BIS-031` (19930). What-if with no lab capacity redirects the flour and costs 28775 EUR. What-if the biscuits are not yet delivered blocks them instead and costs 25553 EUR.
+
 **Resume.** `approve` as the regulator.
 
 ```text
@@ -1189,7 +1224,7 @@ A retailer at Épicerie Rive (`ACT-RIVE`) can trace `BIS-031` and cannot trace `
 - SQLite ERP, quality checks, SQL → graph ingestion
 - In-memory graph and Neo4j constraints, `INPUT_OF`, vector index
 - Hybrid retrieval, schema-grounded text-to-Cypher, read-only guard
-- LangGraph supervisor, three specialist paths, checkpointer, recall interrupt
+- LangGraph supervisor, specialist paths, CP-SAT / HiGHS containment plan, checkpointer, recall interrupt
 - MCP tools and a labelled A2A card and task endpoint
 - Mock LLM and an OpenAI-compatible gateway
 - OpenTelemetry hooks and optional LangSmith env

@@ -82,6 +82,26 @@ def render_documents(question: str, hits: list[dict[str, Any]], notes: list[str]
     return "\n".join(lines)
 
 
+def render_plan(plan: dict[str, Any]) -> str:
+    """Solver output. Does not say a recall was issued; a person still has to approve."""
+
+    if plan.get("status") == "INFEASIBLE":
+        return "Prescriptive plan is infeasible. No recommendation was issued."
+    lines = [
+        (
+            f"Prescriptive plan ({plan['solver']}, {plan['status']}, "
+            f"gap {plan['optimality_gap']}). Total cost: {plan['objective_eur']} EUR."
+        )
+    ]
+    for row in plan.get("decisions") or []:
+        lines.append(
+            f"- {row['lot_id']}: action {row['action']}, {row['cost_eur']} EUR "
+            f"at {row['site_id']} ({row['quantity_kg']} kg)."
+        )
+        lines.append(f"  {row['reason']}")
+    return "\n".join(lines)
+
+
 def render_recall_pending(proposal: dict[str, Any]) -> str:
     return "\n".join(
         [

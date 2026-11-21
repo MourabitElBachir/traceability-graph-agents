@@ -30,6 +30,21 @@ LangChain builds the prompts (text-to-Cypher, short narrative). LangGraph runs t
 
 MCP exposes `trace_lot`, `check_certificates`, and `search_documents` to any MCP client. A2A here is a small card (`a2a-minimal-0.1`) plus `POST /a2a/tasks`. It is labelled as a subset so it is not mistaken for a full agent protocol.
 
+## Descriptive and prescriptive
+
+The ontology and the graph are descriptive: they record what happened and which lots are impacted (`BLE-0457` → `FAR-118` → `BIS-031`, certificate `CERT-77`).
+
+The solver is prescriptive: each impacted lot becomes a variable (block, quarantine-and-test, redirect, or recall) and each rule becomes a constraint (risk threshold, certificate schemes, site and lab capacity, deadline, delivered shipments). Writing that formulation matters more than the choice of solver. CP-SAT and HiGHS solve the same free, open-source model. On the fixture the baseline costs 27683 EUR: block the wheat for 4850, quarantine the flour for 2903, recall the delivered biscuits for 19930. A person still approves before a recall is issued.
+
+```mermaid
+flowchart LR
+  erpNode["SQLite ERP"] --> ontologyNode["Ontology and Neo4j"]
+  ontologyNode --> agentNode["LangGraph agents"]
+  agentNode --> solverNode["CP-SAT or HiGHS"]
+  solverNode --> planNode["Optimal plan"]
+  planNode --> humanNode["Human validation"]
+```
+
 ## Worked example
 
 Ferme des Collines commissions `BLE-0457`. Moulin du Val mills `FAR-118`. Fournil Lumière bakes `BIS-031`. Organisme Horizon’s certificate `CERT-77` covers all three and is valid on 2026-11-13. Épicerie Rive receives the biscuits. A separate mixed flour (`FAR-221`) and an oil lot with no source (`OIL-009`) exist so compliance has anomalies that do not touch the biscuit line.

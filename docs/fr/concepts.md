@@ -13,3 +13,7 @@ Le **RAG** classique cherche des textes proches. Il répond mal à une question 
 **MCP** publie `trace_lot`, `check_certificates`, `search_documents`. **A2A** est ici une carte et un endpoint de tâche, clairement marqués comme sous-ensemble (`a2a-minimal-0.1`).
 
 Exemple : le blé `BLE-0457` est moulu en `FAR-118` puis en biscuits `BIS-031`, sous le certificat valide `CERT-77`.
+
+## Descriptif et prescriptif
+
+Le graphe est descriptif : il dit ce qui s’est passé et quels lots sont touchés. Le solveur est prescriptif : chaque lot devient une variable (bloquer, quarantaine et test, réorienter, rappeler) et chaque règle devient une contrainte (risque, certificat, capacités, délai, livraison déjà faite). La formulation compte plus que le choix du solveur. CP-SAT (OR-Tools) et HiGHS, tous deux libres, résolvent le même modèle. Sur le jeu d’exemple le plan de base coûte 27 683 EUR : bloquer le blé (4 850), mettre la farine en quarantaine (2 903), rappeler les biscuits déjà livrés (19 930). Une personne valide avant toute émission du rappel.

@@ -33,6 +33,15 @@
 <p>LangChain builds the prompts (text-to-Cypher, short narrative). LangGraph runs the supervisor, the specialist nodes, the checkpointer, and the interrupt before a recall is issued.</p>
 <h2>MCP and A2A</h2>
 <p>MCP exposes <code>trace_lot</code>, <code>check_certificates</code>, and <code>search_documents</code> to any MCP client. A2A here is a small card (<code>a2a-minimal-0.1</code>) plus <code>POST /a2a/tasks</code>. It is labelled as a subset so it is not mistaken for a full agent protocol.</p>
+<h2>Descriptive and prescriptive</h2>
+<p>The ontology and the graph are descriptive: they record what happened and which lots are impacted (<code>BLE-0457</code> → <code>FAR-118</code> → <code>BIS-031</code>, certificate <code>CERT-77</code>).</p>
+<p>The solver is prescriptive: each impacted lot becomes a variable (block, quarantine-and-test, redirect, or recall) and each rule becomes a constraint (risk threshold, certificate schemes, site and lab capacity, deadline, delivered shipments). Writing that formulation matters more than the choice of solver. CP-SAT and HiGHS solve the same free, open-source model. On the fixture the baseline costs 27683 EUR: block the wheat for 4850, quarantine the flour for 2903, recall the delivered biscuits for 19930. A person still approves before a recall is issued.</p>
+<pre><code>flowchart LR
+  erpNode[&quot;SQLite ERP&quot;] --&gt; ontologyNode[&quot;Ontology and Neo4j&quot;]
+  ontologyNode --&gt; agentNode[&quot;LangGraph agents&quot;]
+  agentNode --&gt; solverNode[&quot;CP-SAT or HiGHS&quot;]
+  solverNode --&gt; planNode[&quot;Optimal plan&quot;]
+  planNode --&gt; humanNode[&quot;Human validation&quot;]</code></pre>
 <h2>Worked example</h2>
 <p>Ferme des Collines commissions <code>BLE-0457</code>. Moulin du Val mills <code>FAR-118</code>. Fournil Lumière bakes <code>BIS-031</code>. Organisme Horizon’s certificate <code>CERT-77</code> covers all three and is valid on 2026-11-13. Épicerie Rive receives the biscuits. A separate mixed flour (<code>FAR-221</code>) and an oil lot with no source (<code>OIL-009</code>) exist so compliance has anomalies that do not touch the biscuit line.</p>
 </body>
