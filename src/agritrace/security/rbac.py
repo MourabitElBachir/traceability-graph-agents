@@ -50,6 +50,7 @@ _TOOL_ROLES: dict[str, set[str]] = {
         "regulator",
     },
     "read_cypher": {"auditor", "regulator"},
+    "optimize_recall_plan": {"auditor", "regulator", "processor", "certifier"},
     "approve_recall": {"regulator"},
 }
 

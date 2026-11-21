@@ -22,9 +22,9 @@ flowchart TD
   route --> trace --> compose
   route --> compliance --> compose
   route --> documents --> compose
-  route --> recall --> approval --> compose
+  route --> recall["recall"] --> optimize["optimize"] --> approval["approval"] --> compose
   classDef n fill:#1F4D3A,stroke:#14352A,color:#F7F3E8;
-  class route,trace,compliance,documents,recall,approval,compose n;
+  class route,trace,compliance,documents,recall,optimize,approval,compose n;
 ```
 
 ![Agents](assets/langgraph.svg)

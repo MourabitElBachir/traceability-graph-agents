@@ -12,7 +12,9 @@ dependencies = [
     "langchain-core>=0.3",
     "langgraph>=0.2.60",
     "mcp>=1.2",
+    "highspy>=1.7",
     "neo4j>=5.26",
+    "ortools>=9.10",
     "opentelemetry-api>=1.27",
     "opentelemetry-sdk>=1.27",
     "pydantic>=2.6",
@@ -70,7 +72,9 @@ no_implicit_optional = true
 
 [[tool.mypy.overrides]]
 module = [
+    "highspy.*",
     "neo4j.*",
+    "ortools.*",
     "mcp.*",
     "langgraph.*",
     "langchain_core.*",

@@ -9,7 +9,8 @@
 | Python 3.11, Pydantic | Lots et certificats typés |
 | LangChain | Prompts Cypher et narration |
 | LangGraph | Supervision, checkpoint, interruption |
-| SDK MCP | `trace_lot`, `check_certificates`, `search_documents` |
+| SDK MCP | `trace_lot`, `check_certificates`, `search_documents`, `optimize_recall_plan` |
+| OR-Tools CP-SAT et HiGHS | Plan de confinement, solveurs libres |
 | A2A minimal | Carte `a2a-minimal-0.1` et `POST /a2a/tasks` |
 | FastAPI | `/ask`, reprise, Cypher en lecture seule |
 | Streamlit | Même service, avec acteur et boutons d’approbation |

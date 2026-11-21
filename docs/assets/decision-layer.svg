@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img">
+  <rect width="1200" height="280" fill="#F7F3E8"/>
+  <text x="40" y="42" fill="#14352A" font-family="Georgia, serif" font-size="24">Descriptive graph, then a prescriptive plan</text>
+  <g font-family="Georgia, serif" font-size="16" fill="#F7F3E8">
+    <rect x="40" y="90" width="160" height="64" rx="10" fill="#1F4D3A"/>
+    <text x="56" y="128">SQLite ERP</text>
+    <rect x="240" y="90" width="190" height="64" rx="10" fill="#1F4D3A"/>
+    <text x="256" y="128">Ontology and Neo4j</text>
+    <rect x="470" y="90" width="180" height="64" rx="10" fill="#1F4D3A"/>
+    <text x="486" y="128">LangGraph agents</text>
+    <rect x="690" y="90" width="170" height="64" rx="10" fill="#1F4D3A"/>
+    <text x="706" y="128">CP-SAT or HiGHS</text>
+    <rect x="900" y="90" width="150" height="64" rx="10" fill="#8C4A3A"/>
+    <text x="916" y="128">Human validation</text>
+  </g>
+  <g stroke="#C4A35A" stroke-width="3">
+    <line x1="200" y1="122" x2="240" y2="122"/>
+    <line x1="430" y1="122" x2="470" y2="122"/>
+    <line x1="650" y1="122" x2="690" y2="122"/>
+    <line x1="860" y1="122" x2="900" y2="122"/>
+  </g>
+  <text x="40" y="210" fill="#1C1408" font-family="Georgia, serif" font-size="16">BLE-0457 baseline: block 4850 EUR, quarantine FAR-118 2903 EUR, recall BIS-031 19930 EUR. Total 27683 EUR.</text>
+  <text x="40" y="240" fill="#1C1408" font-family="Georgia, serif" font-size="16">The plan is a recommendation until a person approves it.</text>
+</svg>

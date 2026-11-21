@@ -14,6 +14,7 @@ from agritrace.agents.answers import (
     citations_for_trace,
     render_compliance,
     render_documents,
+    render_plan,
     render_recall_final,
     render_recall_pending,
     render_trace,
@@ -21,6 +22,7 @@ from agritrace.agents.answers import (
 from agritrace.agents.router import route_question
 from agritrace.graph.memory import MemoryStore
 from agritrace.llm.provider import LLMClient
+from agritrace.optimization.solve import optimize_recall
 from agritrace.security.guardrails import injection_flags, ungrounded_ids
 from agritrace.security.rbac import (
     AccessDenied,
@@ -43,6 +45,7 @@ class GraphState(TypedDict, total=False):
     documents: list[dict[str, Any]]
     citations: list[dict[str, str]]
     recall_proposal: dict[str, Any] | None
+    plan: dict[str, Any] | None
     human_decision: str | None
     approval_note: str
     answer: str
@@ -172,9 +175,19 @@ def build_agent(store: MemoryStore, llm: LLMClient, as_of: str) -> Any:
             "compliance": report,
             "recall_proposal": proposal,
             "citations": cites,
-            "answer": render_recall_pending(proposal),
             "status": "needs_approval",
         }
+
+    def optimize_node(state: GraphState) -> dict[str, Any]:
+        if state.get("status") == "complete" or not state.get("lot_id") or not state.get("recall_proposal"):
+            return {}
+        from datetime import date
+
+        plan = optimize_recall(store, str(state["lot_id"]), date.fromisoformat(as_of))
+        proposal = dict(state["recall_proposal"] or {})
+        proposal["plan"] = plan
+        answer = render_recall_pending(proposal) + "\n" + render_plan(plan)
+        return {"recall_proposal": proposal, "plan": plan, "answer": answer, "status": "needs_approval"}
 
     def approval_node(state: GraphState) -> dict[str, Any]:
         if state.get("status") == "complete":
@@ -210,6 +223,8 @@ def build_agent(store: MemoryStore, llm: LLMClient, as_of: str) -> Any:
                 str(state.get("human_decision") or "reject"),
                 str(state.get("approval_note") or ""),
             )
+            if state.get("plan"):
+                answer = answer + "\n" + render_plan(state["plan"] or {})
             citations = list(state.get("citations") or [])
         elif route == "trace" and state.get("trace"):
             trace = state["trace"] or {}
@@ -266,6 +281,7 @@ def build_agent(store: MemoryStore, llm: LLMClient, as_of: str) -> Any:
     builder.add_node("compliance", compliance_node)
     builder.add_node("documents", documents_node)
     builder.add_node("recall", recall_node)
+    builder.add_node("optimize", optimize_node)
     builder.add_node("approval", approval_node)
     builder.add_node("compose", compose_node)
     builder.set_entry_point("route")
@@ -283,7 +299,8 @@ def build_agent(store: MemoryStore, llm: LLMClient, as_of: str) -> Any:
     builder.add_edge("trace", "compose")
     builder.add_edge("compliance", "compose")
     builder.add_edge("documents", "compose")
-    builder.add_edge("recall", "approval")
+    builder.add_edge("recall", "optimize")
+    builder.add_edge("optimize", "approval")
     builder.add_edge("approval", "compose")
     builder.add_edge("compose", END)
     return builder.compile(checkpointer=MemorySaver())

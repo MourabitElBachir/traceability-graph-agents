@@ -38,6 +38,21 @@ SQL is the ledger. Ingestion checks referential integrity, writes SQLite, reads 
 | HTTP and A2A | `src/agritrace/api/main.py` |
 | MCP | `src/agritrace/mcp/server.py` |
 
+## Decision layer
+
+Descriptive trace, then a prescriptive plan, then a person.
+
+```mermaid
+flowchart LR
+  erpNode["SQLite ERP"] --> ontologyNode["Ontology and Neo4j"]
+  ontologyNode --> agentNode["LangGraph agents"]
+  agentNode --> solverNode["CP-SAT or HiGHS"]
+  solverNode --> planNode["Optimal plan"]
+  planNode --> humanNode["Human validation"]
+```
+
+![Decision layer](assets/decision-layer.svg)
+
 ## Sequence for a recall of BLE-0457
 
 ```mermaid
