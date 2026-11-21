@@ -1,0 +1,1392 @@
+{
+  "asOf": "2026-11-13",
+  "defaultLotId": "BLE-0457",
+  "lots": [
+    {
+      "id": "BLE-0457",
+      "product": "Blé tendre"
+    },
+    {
+      "id": "FAR-118",
+      "product": "Farine"
+    },
+    {
+      "id": "BIS-031",
+      "product": "Biscuits"
+    }
+  ],
+  "reasons": [
+    {
+      "id": "contamination",
+      "fr": "Contamination",
+      "en": "Contamination"
+    },
+    {
+      "id": "expired",
+      "fr": "Certificat expiré",
+      "en": "Expired certificate"
+    },
+    {
+      "id": "allergen",
+      "fr": "Allergène non déclaré",
+      "en": "Undeclared allergen"
+    }
+  ],
+  "labSteps": [
+    0,
+    1,
+    2,
+    4
+  ],
+  "riskSteps": [
+    0.4,
+    0.6,
+    0.8
+  ],
+  "cases": {
+    "BLE-0457": {
+      "impact": {
+        "lotId": "BLE-0457",
+        "summary": "3 lots touchés sur 3 sites, dont 1 déjà livré à Épicerie Rive.",
+        "source": "Chemin relevé : blé BLE-0457, farine FAR-118, biscuits BIS-031. Le certificat de ce chemin est encore valable jusqu’au 31 décembre 2027.",
+        "nodes": [
+          {
+            "id": "BLE-0457",
+            "label": "Blé tendre BLE-0457",
+            "kind": "lot",
+            "status": "stock",
+            "x": 80,
+            "y": 80
+          },
+          {
+            "id": "FAR-118",
+            "label": "Farine FAR-118",
+            "kind": "lot",
+            "status": "stock",
+            "x": 320,
+            "y": 80
+          },
+          {
+            "id": "BIS-031",
+            "label": "Biscuits BIS-031",
+            "kind": "lot",
+            "status": "livre",
+            "x": 560,
+            "y": 80
+          },
+          {
+            "id": "customer-rive",
+            "label": "Épicerie Rive",
+            "kind": "customer",
+            "status": "livre",
+            "x": 800,
+            "y": 80
+          },
+          {
+            "id": "healthy-halle",
+            "label": "Halle du Marché",
+            "kind": "customer",
+            "status": "sain",
+            "x": 80,
+            "y": 240
+          }
+        ],
+        "edges": [
+          {
+            "source": "BLE-0457",
+            "target": "FAR-118"
+          },
+          {
+            "source": "FAR-118",
+            "target": "BIS-031"
+          },
+          {
+            "source": "BIS-031",
+            "target": "customer-rive"
+          }
+        ],
+        "lots": [
+          {
+            "lotId": "BLE-0457",
+            "product": "Blé tendre",
+            "site": "Ferme des Collines",
+            "status": "stock",
+            "customer": "—"
+          },
+          {
+            "lotId": "FAR-118",
+            "product": "Farine",
+            "site": "Moulin du Val",
+            "status": "stock",
+            "customer": "—"
+          },
+          {
+            "lotId": "BIS-031",
+            "product": "Biscuits",
+            "site": "Épicerie Rive",
+            "status": "livre",
+            "customer": "Épicerie Rive"
+          }
+        ]
+      },
+      "scenarios": [
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.4,
+          "totalEur": 32350.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 6420.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "0|true|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 28775.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 9995.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "redirect",
+              "actionLabel": "Rediriger",
+              "costEur": 3995.0,
+              "why": "Le laboratoire ne peut pas tout contrôler. L’envoyer vers un autre débouché coûte moins cher que de le détruire."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "0|true|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.8,
+          "totalEur": 28775.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 9995.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "redirect",
+              "actionLabel": "Rediriger",
+              "costEur": 3995.0,
+              "why": "Le laboratoire ne peut pas tout contrôler. L’envoyer vers un autre débouché coûte moins cher que de le détruire."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "0|true|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.4,
+          "totalEur": 30220.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 8550.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "0|false|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.6,
+          "totalEur": 26645.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 12125.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "redirect",
+              "actionLabel": "Rediriger",
+              "costEur": 3995.0,
+              "why": "Le laboratoire ne peut pas tout contrôler. L’envoyer vers un autre débouché coûte moins cher que de le détruire."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "0|false|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 0,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.8,
+          "totalEur": 26645.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 12125.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "redirect",
+              "actionLabel": "Rediriger",
+              "costEur": 3995.0,
+              "why": "Le laboratoire ne peut pas tout contrôler. L’envoyer vers un autre débouché coûte moins cher que de le détruire."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "0|false|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.4,
+          "totalEur": 32350.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 6420.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "1|true|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "1|true|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.8,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "1|true|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.4,
+          "totalEur": 30220.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 8550.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "1|false|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.6,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "1|false|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 1,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.8,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "1|false|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.4,
+          "totalEur": 32350.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 6420.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "2|true|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "2|true|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.8,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "2|true|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.4,
+          "totalEur": 30220.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 8550.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "2|false|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.6,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "2|false|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.8,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "2|false|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.4,
+          "totalEur": 32350.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 6420.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "4|true|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "4|true|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.8,
+          "totalEur": 27683.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 11087.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "4|true|0.8"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.4,
+          "totalEur": 30220.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 8550.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 7570.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "4|false|0.4"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.6,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "4|false|0.6"
+        },
+        {
+          "lotId": "BLE-0457",
+          "labTestsPerDay": 4,
+          "biscuitsDelivered": false,
+          "riskThreshold": 0.8,
+          "totalEur": 25553.0,
+          "naiveRecallEur": 38770.0,
+          "savingsEur": 13217.0,
+          "decisions": [
+            {
+              "lotId": "BLE-0457",
+              "product": "Blé tendre",
+              "site": "Ferme des Collines",
+              "quantityKg": 12000,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 4850.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            },
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": false,
+              "action": "block",
+              "actionLabel": "Bloquer",
+              "costEur": 17800.0,
+              "why": "Le risque est élevé. Bloquer coûte moins cher qu’un rappel, car le lot n’est pas encore chez un client."
+            }
+          ],
+          "key": "4|false|0.8"
+        }
+      ]
+    },
+    "FAR-118": {
+      "impact": {
+        "lotId": "FAR-118",
+        "summary": "2 lots touchés sur 2 sites, dont 1 déjà livré à Épicerie Rive.",
+        "source": "Chemin relevé à partir du lot FAR-118.",
+        "nodes": [
+          {
+            "id": "FAR-118",
+            "label": "Farine FAR-118",
+            "kind": "lot",
+            "status": "stock",
+            "x": 80,
+            "y": 80
+          },
+          {
+            "id": "BIS-031",
+            "label": "Biscuits BIS-031",
+            "kind": "lot",
+            "status": "livre",
+            "x": 320,
+            "y": 80
+          },
+          {
+            "id": "customer-rive",
+            "label": "Épicerie Rive",
+            "kind": "customer",
+            "status": "livre",
+            "x": 560,
+            "y": 80
+          },
+          {
+            "id": "healthy-halle",
+            "label": "Halle du Marché",
+            "kind": "customer",
+            "status": "sain",
+            "x": 80,
+            "y": 240
+          }
+        ],
+        "edges": [
+          {
+            "source": "FAR-118",
+            "target": "BIS-031"
+          },
+          {
+            "source": "BIS-031",
+            "target": "customer-rive"
+          }
+        ],
+        "lots": [
+          {
+            "lotId": "FAR-118",
+            "product": "Farine",
+            "site": "Moulin du Val",
+            "status": "stock",
+            "customer": "—"
+          },
+          {
+            "lotId": "BIS-031",
+            "product": "Biscuits",
+            "site": "Épicerie Rive",
+            "status": "livre",
+            "customer": "Épicerie Rive"
+          }
+        ]
+      },
+      "scenarios": [
+        {
+          "lotId": "FAR-118",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 22833.0,
+          "naiveRecallEur": 30320.0,
+          "savingsEur": 7487.0,
+          "decisions": [
+            {
+              "lotId": "FAR-118",
+              "product": "Farine",
+              "site": "Moulin du Val",
+              "quantityKg": 9400,
+              "delivered": false,
+              "action": "quarantine",
+              "actionLabel": "Quarantaine",
+              "costEur": 2903.0,
+              "why": "Le lot est encore sur place. Un contrôle coûte moins cher qu’un rappel."
+            },
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "baseline"
+        }
+      ]
+    },
+    "BIS-031": {
+      "impact": {
+        "lotId": "BIS-031",
+        "summary": "1 lot touché sur 1 site, dont 1 déjà livré à Épicerie Rive.",
+        "source": "Chemin relevé à partir du lot BIS-031.",
+        "nodes": [
+          {
+            "id": "BIS-031",
+            "label": "Biscuits BIS-031",
+            "kind": "lot",
+            "status": "livre",
+            "x": 80,
+            "y": 80
+          },
+          {
+            "id": "customer-rive",
+            "label": "Épicerie Rive",
+            "kind": "customer",
+            "status": "livre",
+            "x": 320,
+            "y": 80
+          },
+          {
+            "id": "healthy-halle",
+            "label": "Halle du Marché",
+            "kind": "customer",
+            "status": "sain",
+            "x": 80,
+            "y": 240
+          }
+        ],
+        "edges": [
+          {
+            "source": "BIS-031",
+            "target": "customer-rive"
+          }
+        ],
+        "lots": [
+          {
+            "lotId": "BIS-031",
+            "product": "Biscuits",
+            "site": "Épicerie Rive",
+            "status": "livre",
+            "customer": "Épicerie Rive"
+          }
+        ]
+      },
+      "scenarios": [
+        {
+          "lotId": "BIS-031",
+          "labTestsPerDay": 2,
+          "biscuitsDelivered": true,
+          "riskThreshold": 0.6,
+          "totalEur": 19930.0,
+          "naiveRecallEur": 19930.0,
+          "savingsEur": 0.0,
+          "decisions": [
+            {
+              "lotId": "BIS-031",
+              "product": "Biscuits",
+              "site": "Épicerie Rive",
+              "quantityKg": 7100,
+              "delivered": true,
+              "action": "recall",
+              "actionLabel": "Rappeler",
+              "costEur": 19930.0,
+              "why": "Ce lot est déjà arrivé chez un client. La seule mesure possible est le rappel."
+            }
+          ],
+          "key": "baseline"
+        }
+      ]
+    }
+  }
+}

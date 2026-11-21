@@ -17,6 +17,12 @@ Ferme des Collines récolte le blé. Le Moulin du Val produit la farine. Le Four
 
 D’autres lots existent pour les anomalies, pas pour l’exemple principal : `CERT-78` périmé, farine mélangée `FAR-221`, huile `OIL-009` sans lot source.
 
+## Écran pour le responsable qualité
+
+Le dossier `web/` est un parcours en français en quatre étapes : alerte, impact, plan, validation. Il ne montre pas le vocabulaire technique. Sans serveur, il lit `web/public/data/scenarios.json`, produit par `python scripts/export_web_scenarios.py` à partir du vrai modèle de coût. Pour le blé `BLE-0457`, tout rappeler coûte 38 770 EUR et le plan recommandé 27 683 EUR, soit 11 087 EUR de moins.
+
+Déploiement Vercel gratuit, sans secret : répertoire racine `web`, framework Next.js, aucune variable d’environnement. Pour brancher l’API, définir `NEXT_PUBLIC_API_URL` à la construction. Captures : `docs/assets/ui-step-1-alerte.png` à `ui-step-4-validation.png`.
+
 ## Ce que le dépôt montre
 
 - Une ontologie OWL (Turtle), inspirée des questions EPCIS quoi / quand / où / pourquoi, sans clés GS1 réelles.

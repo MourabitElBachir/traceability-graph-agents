@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 40 33% 98%;
+  --foreground: 150 18% 12%;
+  --primary: 158 42% 22%;
+  --primary-foreground: 40 33% 98%;
+  --muted: 40 20% 94%;
+  --muted-foreground: 150 6% 36%;
+  --card: 0 0% 100%;
+  --card-foreground: 150 18% 12%;
+  --border: 40 14% 88%;
+  --radius: 0.9rem;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

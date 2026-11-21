@@ -1132,6 +1132,30 @@ make test
 
 MCP stdio server: `python -m agritrace.mcp.server`.
 
+## Quality-manager screen
+
+`web/` is a French screen for the person who decides a withdrawal. It does not show technical vocabulary. Four steps: alert, impact map, recommended plan, validation.
+
+The plan’s total is the real cost model. “Tout rappeler” is the sum of the recall cost of every impacted lot in that same model. On `BLE-0457` that naive total is 38 770 EUR, the recommended plan is 27 683 EUR, and the saving is 11 087 EUR.
+
+Demo mode needs no API and no secret. `python scripts/export_web_scenarios.py` writes `web/public/data/scenarios.json`. The sliders snap to the precomputed lab slots `0, 1, 2, 4` and caution levels `0.4, 0.6, 0.8`.
+
+Live mode: set `NEXT_PUBLIC_API_URL` at build time. The API exposes `GET /ui/impact/{lot_id}`, `POST /ui/plan`, and `POST /ui/approve`, with CORS from `CORS_ORIGINS` (default `*`).
+
+Vercel, free, zero secrets:
+
+- Framework: Next.js
+- Root Directory: `web`
+- Build command: `npm run build`
+- Output: default Next.js
+- Environment variables: none for the demo
+
+Screenshots: `docs/assets/ui-step-1-alerte.png`, `ui-step-2-impact.png`, `ui-step-3-plan.png`, `ui-step-4-validation.png`.
+
+![Alert step](docs/assets/ui-step-1-alerte.png)
+
+Limits: the hosted demo cannot invent a new lot or a slider value that was not exported. Approvals stay in the browser (`localStorage`) unless live mode is on. The PDF uses a simple embedded font, so a few punctuation marks are flattened.
+
 ---
 
 ## 16. Example questions and answers
